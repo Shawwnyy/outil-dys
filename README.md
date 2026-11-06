@@ -209,3 +209,13 @@ Le nombre de lunes évolue avec les découvertes : vérifie une source récente.
 **⌨️ Dactylographie (Mes outils)** : exercices (rangée de repos, mots, mots avec accents, phrases, un texte, mon texte, chrono 1 minute). Chrono dès la première touche, texte coloré lettre par lettre (juste / faux / lettre à taper, avec un fond plein pour les fautes : pas seulement la couleur), coller désactivé. Résultat : vitesse nette et brute (1 mot = 5 caractères), précision, retours en arrière, correction détaillée, touches à retravailler et bouton « S'entraîner sur ces touches », historique et courbe de progression locale. Option pour cacher le chrono (moins de pression). Pas de classement.
 
 **Comparateur de dictée amélioré** (`Dict.align`) : quand plusieurs mots faux se suivent, chaque mot est associé au mot attendu le plus proche (« baton » → « bâton », « a » → « à ») au lieu d'être listé « oublié » + « en trop ».
+
+## Mise à jour V2.3 : le sens des proverbes et des citations, accueil réorganisé
+
+**💡 Le « Sens » à côté de chaque phrase** : dans le bandeau du haut, chaque proverbe ou citation est suivi d'une explication en mots simples (« 💡 Sens : … »). La citation est à gauche, son sens à côté (en dessous sur mobile). Option dans Paramètres : « Afficher l'explication du sens ». Les mots difficiles de la phrase restent survolables.
+
+**69 phrases** (une nouvelle chaque minute, ordre mélangé, ↻ pour en voir une autre) : les 48 proverbes d'avant, avec leur explication, et **21 citations d'auteurs anciens (domaine public)**, toujours données avec l'auteur **et** l'œuvre : La Fontaine (*Fables*), Boileau (*L'Art poétique*), Molière (*Le Bourgeois gentilhomme*, *L'Avare*), Corneille (*Le Cid*), Pascal (*Pensées*), Descartes (*Discours de la méthode*), Voltaire (*Candide*), Rabelais (*Pantagruel*), Dumas (*Les Trois Mousquetaires*), Montaigne (*Essais*), Sénèque (*Lettres à Lucilius*), Vauvenargues (*Réflexions et maximes*). Aucune phrase « célèbre » dont l'auteur est douteux n'est incluse (pas d'Einstein, de Gandhi, etc.). Les explications sont des lectures simples, pas la seule interprétation possible.
+
+**🏠 Accueil** : les outils sont maintenant juste sous « Bienvenue ». Le bouton « ▶ Reprendre » est à côté de la recherche ; les favoris ⭐ et les outils récemment ouverts passent sous les tuiles.
+
+**Écran** : comme le bandeau est un peu plus haut, l'en-tête reste collé en haut seulement si la fenêtre fait plus de 780 px de haut (sinon il défile avec la page).

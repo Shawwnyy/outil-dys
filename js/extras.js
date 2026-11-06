@@ -29,9 +29,9 @@ const Extras = (() => {
   };
 
   // bloc du haut de l'accueil : reprendre, favoris, récents (le mot du jour est en bas de l'accueil)
+  const resumeBtn = () => { const rc = recent(); if (!rc.length) return null; const m = modOf(rc[0]); return h('a', { class: 'btn', href: '#/' + m.id }, '▶ Reprendre : ' + label(m)); };
   const homeTop = () => {
     const box = h('div', { class: 'home-top' }); const rc = recent(), fv = favs();
-    if (rc.length) { const m = modOf(rc[0]); box.append(h('p', { style: 'margin:.2rem 0 .6rem' }, h('a', { class: 'btn', href: '#/' + m.id }, '▶ Reprendre : ' + label(m)))); }
     if (fv.length) box.append(h('section', { class: 'home-sec' }, h('h2', null, '⭐ Mes favoris'), h('div', { class: 'row' }, fv.map(id => { const m = modOf(id); return h('a', { class: 'btn sec', href: '#/' + id }, label(m)); }))));
     const rr = rc.filter(id => !fv.includes(id)).slice(0, 5); if (rr.length) box.append(h('section', { class: 'home-sec' }, h('h2', null, '🕘 Récemment ouverts'), h('div', { class: 'row' }, rr.map(id => h('a', { class: 'btn ghost', href: '#/' + id }, label(modOf(id)))))));
     return box;
@@ -89,7 +89,7 @@ const Extras = (() => {
     el.append(aboutCard());
   };
 
-  const VERSION = 'Outil Dys V2.1 — 6 novembre 2026';
+  const VERSION = 'Outil Dys V2.3 — 6 novembre 2026';
   const aboutCard = () => h('div', { class: 'card secondary' }, h('h2', { style: 'margin-top:0' }, 'ℹ️ À propos'), h('p', null, VERSION + '. Outil local et privé : tes textes restent sur cet appareil.'),
     h('ul', null, h('li', null, 'Les aides proposées sont des adaptations, pas des diagnostics : l’outil ne dit jamais si une personne a un trouble.'), h('li', null, 'Le correcteur fonctionne par règles : il rate des fautes et peut se tromper. Relis toujours.'), h('li', null, 'Les données (santé, mots nouveaux…) viennent de sources publiques datées ; elles peuvent être incomplètes ou changer.'), h('li', null, 'Rien ne part sur internet sans ton clic (définitions en ligne, liens externes).')),
     h('p', { class: 'muted' }, 'Code : ', h('a', { href: 'https://github.com/Shawwnyy/outil-dys', target: '_blank', rel: 'noopener noreferrer' }, 'github.com/Shawwnyy/outil-dys'), ' (le lien s’ouvre seulement si tu cliques).'));
@@ -97,5 +97,5 @@ const Extras = (() => {
     document.addEventListener('keydown', e => { if (e.key !== '?' || e.ctrlKey || e.metaKey || e.altKey) return; const a = document.activeElement; if (a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable)) return; e.preventDefault(); help(); });
     initSW();
   };
-  return { init, afterRoute, homeTop, wodCard, settingsCards, help, favs, recent, toggleFav, wordOfDay, exportData, parseBackup, restore, keys, offlineInfo };
+  return { init, afterRoute, homeTop, resumeBtn, wodCard, settingsCards, help, favs, recent, toggleFav, wordOfDay, exportData, parseBackup, restore, keys, offlineInfo };
 })();

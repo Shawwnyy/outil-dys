@@ -115,6 +115,7 @@ table.t{border-collapse:collapse;width:100%}table.t th,table.t td{border:1px sol
 .ib-time{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);display:inline-block;min-width:5.6em;font-size:1.45em;line-height:1.2}
 .ib-quote{flex:1 1 13rem;font-style:italic;min-width:0;font-size:1.05em;line-height:1.4}
 .ib-src{font-style:normal;color:var(--muted);font-size:.78em}
+.ib-sens{flex:1 1 17rem;min-width:0;font-style:normal;font-size:.8em;line-height:1.45;padding:.3rem .6rem;border-left:3px solid var(--accent);background:var(--soft);border-radius:0 .4rem .4rem 0;color:var(--ink)}.ib-sens b{color:var(--accent)}.ib-sens[hidden],#infobar.nosens .ib-sens{display:none}
 .ib-next,.ib-etat{min-height:2.6rem;padding:.2rem .9rem;font-size:.9em}.ib-emo{letter-spacing:.15em}
 body.focus #infobar{display:none}
 @media (max-width:600px){#top{position:static}#infobar{font-size:1.02rem}.ib-time{font-size:1.35em}}
@@ -189,8 +190,8 @@ body.focus #infobar{display:none}
 .hm-note{font-size:.85rem;color:var(--muted);margin:.6rem 0 0}
 
 /* en-tête : lisible à tous les niveaux de zoom du navigateur. Sur un écran peu haut (zoom 150 % et plus), l'en-tête n'est plus collé en haut : il défile avec la page au lieu de manger l'écran. */
-@media (max-height:620px){#top{position:static}}
-.ib-when{order:1}.ib-quote{order:2}.ib-next{order:3}.ib-etat{order:4}
+@media (max-height:780px){#top{position:static}}
+.ib-when{order:1}.ib-etat{order:2;margin-left:auto}.ib-br{order:3;flex:1 1 100%;height:0;margin:-.35rem 0 0}.ib-quote{order:5;flex:1 1 17rem}.ib-sens{order:6}.ib-next{order:7}
 @media (max-width:900px){#infobar{font-size:1.1rem}.ib-time{font-size:1.35em}}
 @media (max-width:900px){#top .lbl{display:none}#logo{height:36px}#brand{font-size:1.2rem}}
 
