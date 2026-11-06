@@ -224,5 +224,5 @@ const Bandeau = (() => {
     label(); paintGlobal(); bar.append(open, panel);
   };
 
-  return { MOTS, quoteNodes, mount, attach, hideTip, DIMS };
+  return { MOTS, quoteNodes, mount, attach, showTip, hideTip, DIMS };
 })();

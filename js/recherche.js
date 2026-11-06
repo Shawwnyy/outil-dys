@@ -55,7 +55,10 @@ const Recherche = (() => {
       if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { const els = [input, ...res.querySelectorAll('a,button')], i = els.indexOf(document.activeElement); const n = els[Math.max(0, Math.min(els.length - 1, i + (ev.key === 'ArrowDown' ? 1 : -1)))]; if (n) { n.focus(); ev.preventDefault(); } }
     });
     document.addEventListener('click', ev => { const path = ev.composedPath ? ev.composedPath() : []; if (!path.includes(form) && !form.contains(ev.target)) close(); }); // composedPath : le bouton cliqué a pu être retiré de la page avant ce test
+    const open = w => { input.value = w; input.focus(); run(); };
+    api.open = open;
     document.addEventListener('keydown', ev => { const a = document.activeElement, typing = a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable); if ((ev.key === '/' && !typing && !ev.ctrlKey && !ev.metaKey && !ev.altKey) || ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'k')) { ev.preventDefault(); input.focus(); input.select(); } });
   };
-  return { init };
+  const api = { init, open: () => {} };
+  return api;
 })();
