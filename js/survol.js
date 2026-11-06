@@ -15,8 +15,8 @@ const Survol = (() => {
     profil: 'Régler la police, les espacements, la règle de lecture et la concentration selon tes besoins.',
     prefs: 'Les réglages d’affichage et de lecture : police, couleurs, voix, taille.',
     docs: 'Tes textes et documents, gardés sur cet appareil.',
-    prog: 'Ton suivi : exercices faits et temps passé, gardés sur cet appareil.',
-    histo: 'Ton suivi : exercices faits et temps passé, gardés sur cet appareil.',
+    prog: 'Fautes les plus fréquentes, activité des 14 derniers jours et résultats des exercices, gardés sur cet appareil.',
+    histo: 'Ton historique d’activité : il s’ouvre dans « Ma progression ».',
     sante: 'Carte de France par région, recherche de professionnels de santé (données publiques, incomplètes) et carnet privé.',
     correcteur: 'Repère les fautes et les explique, colorées selon 15 catégories.',
     lecture: 'Lit ton texte à voix haute avec la voix de ton choix, avec les syllabes et une règle de lecture.',
@@ -32,8 +32,8 @@ const Survol = (() => {
     revision: 'Garde les mots ratés en dictée et te les fait réviser en courtes séances.',
     dico: 'Cherche un mot : écoute-le, syllabes, définition. Mots nouveaux 2026-2027 et mots qui se ressemblent.',
     matieres: 'Géographie, histoire, langues, sciences, informatique… toutes les matières.',
-    'm-francais': 'La matière Français : outils et exercices.', 'm-sciences': 'La matière Sciences : outils et exercices.', 'm-langues': 'Vocabulaire, prononciation et entraînement en langues.',
-    'm-culture': 'La matière Culture générale.', 'm-autres': 'Les autres matières.', 'm-info': 'La matière Informatique.', 'm-histoire': 'La matière Histoire.', 'm-geo': 'Géographie : carte, capitales et jeux.',
+    'm-francais': 'Outils de lecture, de simplification et de correction pour le français, et les homophones à ne pas confondre.', 'm-sciences': 'Outils de cours et un compte rendu d’expérience guidé, corrigé ensuite.', 'm-langues': 'Tes propres cartes de vocabulaire, avec entraînement.',
+    'm-culture': 'Tes fiches de culture générale (cartes de définitions) et les outils de cours.', 'm-autres': 'Tes fiches pour les autres matières et les outils de cours.', 'm-info': 'Convertisseur de bases (binaire, hexadécimal…) avec les étapes, et les outils de cours.', 'm-histoire': 'Repères, frise chronologique et calcul de siècles et de durées (sans dates préremplies).', 'm-geo': 'Repères, latitude et longitude, jeu des capitales, et tes propres données (avec année et source).',
     maths: 'Calcul pas à pas, droite numérique, fractions, quantités, tables et unités.',
     'mode-dyslexie': 'Des outils souvent utiles quand la lecture est difficile.' + ADAPT, 'mode-dysorthographie': 'Des outils souvent utiles quand l’orthographe est difficile.' + ADAPT,
     'mode-dyspraxie': 'Des outils souvent utiles pour s’organiser, écrire et se repérer.' + ADAPT, 'mode-dyscalculie': 'Des outils souvent utiles pour les nombres et le calcul.' + ADAPT,
@@ -43,7 +43,7 @@ const Survol = (() => {
     apprendre: 'Plusieurs façons d’apprendre : lire, écouter, dessiner, s’exercer.',
     'mode-spatial': 'T’entraîner à te repérer : mises en situation (chambre, classe, cuisine, parc), gauche et droite, trajets, quadrillage, points cardinaux.',
     fiches: 'Fiches, cartes mentales et quiz à partir de n’importe quel document.', cartes: 'Cartes mentales à partir d’un texte.', quiz: 'Un quiz fait à partir d’un document.',
-    exercices: 'Exercices progressifs d’orthographe.', concentration: 'Des outils pour t’organiser et rester concentré.', jeux: 'Jeux et défis pour s’entraîner en s’amusant.',
+    exercices: 'Exercices progressifs d’orthographe.', concentration: 'Minuteur de travail et de pause, devoir découpé en étapes, objectifs courts, organisation des révisions et notes.', jeux: 'Le coin des jeux : couleurs, capitales, tables, repérage, vocabulaire, dictée… sans chrono ni classement.',
     defis: 'Défis facultatifs : suites logiques, nombres premiers, estimations.', settings: 'Les réglages de l’application : affichage, voix, données.'
   };
 
