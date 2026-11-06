@@ -4,15 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Outil Dys V2 — apprendre, écrire, comprendre</title>
-<link rel="icon" type="image/png" href="img/humanix.png">
-<link rel="stylesheet" href="css/style.css?v=20261106c">
+<link rel="icon" type="image/svg+xml" href="img/logo.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="img/icon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="img/icon-48.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1d4ed8">
+<link rel="stylesheet" href="css/style.css?v=20261106d">
 </head>
 <body>
 <a class="skip" href="#main">Aller au contenu</a>
 <div id="app">
   <header id="top">
     <button id="menuBtn" class="btn ghost" aria-controls="nav" aria-expanded="true" title="Afficher / masquer le menu" aria-label="Menu">☰<span class="lbl"> Menu</span></button>
-    <a id="brand" href="#/home">Outil Dys</a>
+    <a id="brand" href="#/home"><img class="brandlogo" src="img/logo.svg" alt="" width="42" height="42"><span>Outil Dys</span></a>
     <span id="wsInfo" class="muted" title="Document en cours de travail, partagé entre tous les outils"></span>
     <span class="grow"></span>
     <button id="aMinus" class="btn ghost" title="Réduire le texte" aria-label="Réduire la taille du texte">A−</button>
@@ -29,23 +34,24 @@
 <div id="pop" role="dialog" aria-modal="false" hidden></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script src="libs/pdf-lib.min.js?v=20261106c"></script>
-<script src="js/data.js?v=20261106c"></script>
-<script src="js/corrector.js?v=20261106c"></script>
-<script src="js/citations.js?v=20261106c"></script>
-<script src="js/bandeau.js?v=20261106c"></script>
-<script src="js/app.js?v=20261106c"></script>
-<script src="js/tools.js?v=20261106c"></script>
-<script src="js/report.js?v=20261106c"></script>
-<script src="js/slides.js?v=20261106c"></script>
-<script src="js/subjects.js?v=20261106c"></script>
-<script src="js/revision.js?v=20261106c"></script>
-<script src="js/dico.js?v=20261106c"></script>
-<script src="js/maths.js?v=20261106c"></script>
-<script src="js/espace.js?v=20261106c"></script>
-<script src="js/repere.js?v=20261106c"></script>
-<script src="js/geo.js?v=20261106c"></script>
-<script src="js/sante.js?v=20261106c"></script>
+<script src="libs/pdf-lib.min.js?v=20261106d"></script>
+<script src="js/data.js?v=20261106d"></script>
+<script src="js/corrector.js?v=20261106d"></script>
+<script src="js/citations.js?v=20261106d"></script>
+<script src="js/bandeau.js?v=20261106d"></script>
+<script src="js/humeur.js?v=20261106d"></script>
+<script src="js/app.js?v=20261106d"></script>
+<script src="js/tools.js?v=20261106d"></script>
+<script src="js/report.js?v=20261106d"></script>
+<script src="js/slides.js?v=20261106d"></script>
+<script src="js/subjects.js?v=20261106d"></script>
+<script src="js/revision.js?v=20261106d"></script>
+<script src="js/dico.js?v=20261106d"></script>
+<script src="js/maths.js?v=20261106d"></script>
+<script src="js/espace.js?v=20261106d"></script>
+<script src="js/repere.js?v=20261106d"></script>
+<script src="js/geo.js?v=20261106d"></script>
+<script src="js/sante.js?v=20261106d"></script>
 <script>App.start();</script>
 </body>
 </html>

@@ -115,22 +115,22 @@ const Bandeau = (() => {
     if (last < text.length) out.push(text.slice(last)); return out;
   };
 
-  // ── « Comment je me sens ? » ──
+  // ── « Comment je me sens ? » : un mot par ligne (corps, émotions, tête) + une note de 1 à 10 par ligne ──
   const DIMS = [
-    { k: 'p', ico: '💪', t: 'Mon corps', opts: [
+    { k: 'p', s: 'sp', ico: '💪', t: 'Mon corps', v: '--sv-p', opts: [
       ['⚡', 'En forme', 'Tu as de l’énergie et ton corps va bien.'],
       ['😴', 'Fatigué(e)', 'Tu manques d’énergie, tu as besoin de te reposer.'],
       ['😬', 'Tendu(e)', 'Tes muscles sont raides ou crispés (épaules, nuque, mâchoire…).'],
       ['🤕', 'Mal quelque part', 'Tu as une douleur (tête, ventre, dos…).'],
       ['🥤', 'Faim ou soif', 'Ton corps te demande à manger ou à boire.']] },
-    { k: 'e', ico: '💛', t: 'Mes émotions', opts: [
+    { k: 'e', s: 'se', ico: '💛', t: 'Mes émotions', v: '--sv-e', opts: [
       ['😊', 'Content(e)', 'Tu te sens bien, de bonne humeur.'],
       ['😌', 'Calme', 'Tu es tranquille, sans agitation.'],
       ['😰', 'Stressé(e)', 'Tu te sens sous pression : tout va trop vite ou tu as peur de ne pas y arriver.'],
       ['😠', 'Énervé(e)', 'Tu ressens de la colère ou de l’agacement.'],
       ['😢', 'Triste', 'Tu as de la peine, tu n’as pas le moral.'],
       ['😞', 'Découragé(e)', 'Tu as envie d’abandonner parce que c’est difficile.']] },
-    { k: 'm', ico: '🧠', t: 'Ma tête', opts: [
+    { k: 'm', s: 'sm', ico: '🧠', t: 'Ma tête', v: '--sv-m', opts: [
       ['🎯', 'Concentré(e)', 'Ton attention reste sur ce que tu fais.'],
       ['💡', 'Motivé(e)', 'Tu as envie de t’y mettre et d’avancer.'],
       ['🌫️', 'Dispersé(e)', 'Ton attention part dans tous les sens.'],
@@ -140,8 +140,10 @@ const Bandeau = (() => {
   const find = (k, label) => { const d = DIMS.find(x => x.k === k); return d && d.opts.find(o => o[1] === label); };
   const today = t => t && new Date(t).toDateString() === new Date().toDateString();
   const curState = () => { const c = Store.get('etat.cur', null); return c && today(c.t) ? c : null; };
-  const summary = c => c ? DIMS.map(d => { const o = c[d.k] && find(d.k, c[d.k]); return o ? o[0] : '·'; }).join(' ') : '';
-  const words = c => c ? DIMS.map(d => c[d.k] ? d.t + ' : ' + c[d.k] : '').filter(Boolean).join(' · ') : '';
+  const mean = c => { const v = c ? DIMS.map(d => c[d.s]).filter(x => typeof x === 'number') : []; return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+  const fm = n => (Math.round(n * 10) / 10).toString().replace('.', ',');
+  const summary = c => { if (!c) return ''; const em = DIMS.map(d => { const o = c[d.k] && find(d.k, c[d.k]); return o ? o[0] : '·'; }), any = em.some(x => x !== '·'), g = mean(c); return (any ? em.join(' ') : '') + (g != null ? (any ? ' · ' : '') + fm(g) + '/10' : ''); };
+  const words = c => c ? DIMS.map(d => c[d.k] || typeof c[d.s] === 'number' ? d.t + ' : ' + [c[d.k], typeof c[d.s] === 'number' ? c[d.s] + '/10' : null].filter(Boolean).join(' ') : '').filter(Boolean).join(' · ') : '';
   const fmtTime = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
   const advice = c => {
@@ -153,23 +155,28 @@ const Bandeau = (() => {
     if (has('e', ['Triste', 'Découragé(e)'])) out.push('C’est permis de ne pas aller bien. Tu peux en parler à une personne de confiance, et avancer par tout petits pas.');
     if (has('m', ['Dispersé(e)', 'Débordé(e)'])) out.push('Essaie de ne faire qu’une seule chose à la fois. Le mode concentration cache le menu pour t’aider.');
     if (has('m', ['Perdu(e)'])) out.push('Découpe la tâche en petites étapes ; l’outil « Simplifier » peut t’aider à comprendre un texte difficile.');
-    if (!out.length && (c.p || c.e || c.m)) out.push('C’est noté. Tu peux continuer à ton rythme.');
+    if (DIMS.some(d => typeof c[d.s] === 'number' && c[d.s] <= 3)) out.push('Une note basse, ça arrive. Si c’est comme ça depuis plusieurs jours, parles-en à un adulte de confiance ou à un professionnel.');
+    if (!out.length && (c.p || c.e || c.m || mean(c) != null)) out.push('C’est noté. Tu peux continuer à ton rythme.');
     return out;
   };
 
   const mount = bar => {
     const open = h('button', { class: 'btn ib-etat', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'etatPanel' });
-    const label = () => { const c = curState(); open.replaceChildren(h('span', { 'aria-hidden': 'true' }, '💬 '), c ? h('span', null, 'Mon état ', h('span', { class: 'ib-emo', 'aria-hidden': 'true' }, summary(c))) : 'Comment je me sens ?'); open.setAttribute('aria-label', c ? 'Mon état du moment : ' + words(c) + '. Modifier.' : 'Comment je me sens ? Dire mon état : corps, émotions, tête.'); open.title = c ? words(c) : 'Dire comment je me sens : corps, émotions, tête'; };
+    const label = () => { const c = curState(); open.replaceChildren(h('span', { 'aria-hidden': 'true' }, '💬 '), c && (words(c)) ? h('span', null, 'Mon état ', h('span', { class: 'ib-emo', 'aria-hidden': 'true' }, summary(c))) : 'Comment je me sens ?'); open.setAttribute('aria-label', c && words(c) ? 'Mon état du moment : ' + words(c) + '. Modifier.' : 'Comment je me sens ? Dire mon état : corps, émotions, tête, avec une note sur 10.'); open.title = c && words(c) ? words(c) : 'Dire comment je me sens : corps, émotions, tête, avec une note sur 10'; };
     const panel = h('section', { id: 'etatPanel', class: 'etat-panel', hidden: true, 'aria-label': 'Mon état du moment' });
     const defLine = h('p', { class: 'etat-def', 'aria-live': 'polite' }), tips = h('div', { class: 'etat-tips', 'aria-live': 'polite' }), hist = h('div');
     const DEF0 = 'Passe la souris sur un mot (ou touche-le) pour voir ce qu’il veut dire.';
-    const sel = Object.assign({ p: null, e: null, m: null }, curState() || {});
-    const chips = {};
+    const sel = Object.assign({ p: null, e: null, m: null, sp: null, se: null, sm: null }, curState() || {});
+    const ui = {}; const gNum = h('b', { class: 'etat-gnum' }), gFill = h('span', { class: 'etat-gfill' });
+    const hm = typeof Humeur !== 'undefined' ? Humeur.mount() : null;
 
+    const paintGlobal = () => { const g = mean(sel); gNum.textContent = g == null ? '–' : fm(g); gNum.style.opacity = g == null ? '.4' : '1'; gFill.style.width = g == null ? '0%' : g * 10 + '%'; };
+    const syncAll = () => { DIMS.forEach(d => { ui[d.k].chips.forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === sel[d.k]))); ui[d.k].scores.forEach(x => x.setAttribute('aria-pressed', String(+x.dataset.n === sel[d.s]))); ui[d.k].out.textContent = typeof sel[d.s] === 'number' ? sel[d.s] + ' / 10' : '— / 10'; }); paintGlobal(); };
     const save = () => {
-      const any = sel.p || sel.e || sel.m; Store.set('etat.cur', any ? { p: sel.p, e: sel.e, m: sel.m, t: Date.now() } : null);
-      if (any) { const log = Store.get('etat.log', []); const e = { t: Date.now(), p: sel.p, e: sel.e, m: sel.m }; if (log.length && e.t - log[log.length - 1].t < 120000) log[log.length - 1] = e; else log.push(e); Store.set('etat.log', log.slice(-200)); }
-      label(); paintHist(); paintTips();
+      const any = DIMS.some(d => sel[d.k] || typeof sel[d.s] === 'number'); const rec = { p: sel.p, e: sel.e, m: sel.m, sp: sel.sp, se: sel.se, sm: sel.sm };
+      Store.set('etat.cur', any ? { ...rec, t: Date.now() } : null);
+      if (any) { const log = Store.get('etat.log', []); const e = { t: Date.now(), ...rec }; if (log.length && e.t - log[log.length - 1].t < 120000) log[log.length - 1] = e; else log.push(e); Store.set('etat.log', log.slice(-5000)); }
+      label(); paintHist(); paintTips(); paintGlobal(); if (hm) hm.refresh();
     };
     const paintTips = () => {
       const a = advice(sel); tips.replaceChildren(...a.map(t => h('p', null, '💡 ' + t)));
@@ -178,32 +185,43 @@ const Bandeau = (() => {
     };
     const paintHist = () => {
       const log = Store.get('etat.log', []).slice().reverse(); const rows = log.slice(0, 15);
-      hist.replaceChildren(h('details', null, h('summary', null, 'Mon historique (' + log.length + ')'),
+      hist.replaceChildren(h('details', { class: 'etat-histd' }, h('summary', null, 'Mon historique (' + log.length + ')'),
         rows.length ? h('ul', { class: 'etat-hist' }, rows.map(e => h('li', null, h('b', null, fmtTime.format(new Date(e.t))), ' — ' + words(e)))) : h('p', { class: 'muted' }, 'Rien pour l’instant.'),
         rows.length ? h('div', { class: 'row' },
           h('button', { class: 'btn sec', type: 'button', onclick: () => App.copy(log.map(e => fmtTime.format(new Date(e.t)) + ' — ' + words(e)).join('\n')).then(() => App.toast('Historique copié.')) }, '📋 Copier'),
-          h('button', { class: 'btn sec', type: 'button', onclick: () => { if (confirm('Effacer tout l’historique de mon état sur cet appareil ?')) { Store.set('etat.log', []); paintHist(); } } }, '🗑 Effacer l’historique')) : null));
+          h('button', { class: 'btn sec', type: 'button', onclick: () => { if (confirm('Effacer tout l’historique (et les courbes) de mon état sur cet appareil ?')) { Store.set('etat.log', []); paintHist(); if (hm) hm.refresh(); } } }, '🗑 Effacer l’historique')) : null));
     };
+    const setDef = (o, on) => { defLine.textContent = on ? o[0] + ' ' + o[1] + ' : ' + o[2] : DEF0; };
 
-    DIMS.forEach(d => { chips[d.k] = []; });
-    const groups = DIMS.map(d => h('fieldset', { class: 'etat-grp' }, h('legend', null, d.ico + ' ' + d.t),
-      h('div', { class: 'etat-chips' }, d.opts.map(o => {
-        const b = h('button', { class: 'etat-chip', type: 'button', 'aria-pressed': String(sel[d.k] === o[1]) }, h('span', { 'aria-hidden': 'true' }, o[0] + ' '), o[1]);
-        attach(b, o[1], o[2]); b.addEventListener('mouseenter', () => { defLine.textContent = o[0] + ' ' + o[1] + ' : ' + o[2]; }); b.addEventListener('focus', () => { defLine.textContent = o[0] + ' ' + o[1] + ' : ' + o[2]; });
-        b.addEventListener('click', () => { sel[d.k] = sel[d.k] === o[1] ? null : o[1]; chips[d.k].forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === sel[d.k]))); defLine.textContent = sel[d.k] ? o[0] + ' ' + o[1] + ' : ' + o[2] : DEF0; save(); });
-        b.dataset.v = o[1]; chips[d.k].push(b); return b;
-      }))));
+    const cards = DIMS.map(d => {
+      const out = h('span', { class: 'etat-out' }), id = 'etatC' + d.k;
+      const chips = d.opts.map(o => {
+        const b = h('button', { class: 'etat-chip', type: 'button', 'aria-pressed': String(sel[d.k] === o[1]) }, h('span', { 'aria-hidden': 'true' }, o[0] + ' '), o[1]); b.dataset.v = o[1];
+        attach(b, o[1], o[2]); b.addEventListener('mouseenter', () => setDef(o, true)); b.addEventListener('focus', () => setDef(o, true));
+        b.addEventListener('click', () => { sel[d.k] = sel[d.k] === o[1] ? null : o[1]; setDef(o, !!sel[d.k]); syncAll(); save(); }); return b;
+      });
+      const scores = Array.from({ length: 10 }, (_, i) => { const n = i + 1, b = h('button', { class: 'etat-sc', type: 'button', 'aria-pressed': String(sel[d.s] === n), 'aria-label': 'Note ' + n + ' sur 10' }, String(n)); b.dataset.n = n; b.addEventListener('click', () => { sel[d.s] = sel[d.s] === n ? null : n; syncAll(); save(); }); return b; });
+      ui[d.k] = { chips, scores, out };
+      return h('div', { class: 'etat-card', role: 'group', 'aria-labelledby': id, style: '--c:var(' + d.v + ')' },
+        h('div', { class: 'etat-ch' }, h('span', { class: 'etat-ico', 'aria-hidden': 'true' }, d.ico), h('b', { id }, d.t), out),
+        h('div', { class: 'etat-chips' }, chips),
+        h('div', { class: 'etat-scl' }, h('span', null, 'Ma note sur 10'), h('span', { class: 'muted' }, '1 = très mal · 10 = très bien')),
+        h('div', { class: 'etat-scores', role: 'group', 'aria-label': 'Note de ' + d.t.toLowerCase() + ' sur 10' }, scores));
+    });
     const hide = () => { panel.hidden = true; open.setAttribute('aria-expanded', 'false'); hideTip(); };
-    const show = () => { panel.hidden = false; open.setAttribute('aria-expanded', 'true'); defLine.textContent = DEF0; paintTips(); paintHist(); };
+    const show = () => { panel.hidden = false; open.setAttribute('aria-expanded', 'true'); defLine.textContent = DEF0; syncAll(); paintTips(); paintHist(); if (hm) hm.refresh(); };
     panel.append(
-      h('div', { class: 'row', style: 'justify-content:space-between;align-items:center' }, h('h2', { style: 'margin:0;font-size:1.15rem' }, 'Comment je me sens maintenant ?'), h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Fermer', onclick: () => { hide(); open.focus(); } }, '✕ Fermer')),
-      h('p', { class: 'muted', style: 'margin:.2rem 0 .6rem' }, 'Choisis un mot par ligne (ou aucun). Ça reste sur cet appareil ; ce n’est ni un test ni un diagnostic.'),
-      h('div', { class: 'etat-grid' }, ...groups), defLine, tips,
-      h('div', { class: 'row' }, h('button', { class: 'btn sec', type: 'button', onclick: () => { sel.p = sel.e = sel.m = null; DIMS.forEach(d => chips[d.k].forEach(x => x.setAttribute('aria-pressed', 'false'))); defLine.textContent = DEF0; save(); } }, 'Effacer mon choix')), hist);
+      h('div', { class: 'etat-top' },
+        h('div', null, h('h2', { class: 'etat-h' }, 'Comment je me sens maintenant ?'), h('p', { class: 'muted etat-sub' }, 'Un mot et une note par ligne (ou rien). Ça reste sur cet appareil ; ce n’est ni un test ni un diagnostic.')),
+        h('div', { class: 'etat-g', role: 'group', 'aria-label': 'Ma note du moment' }, h('span', { class: 'etat-gl' }, 'Ma note du moment'), h('span', { class: 'etat-gv' }, gNum, h('span', null, ' / 10')), h('span', { class: 'etat-gt', 'aria-hidden': 'true' }, gFill)),
+        h('button', { class: 'btn ghost', type: 'button', 'aria-label': 'Fermer', onclick: () => { hide(); open.focus(); } }, '✕ Fermer')),
+      h('div', { class: 'etat-grid' }, ...cards), defLine, tips,
+      h('div', { class: 'row etat-actions' }, h('button', { class: 'btn sec', type: 'button', onclick: () => { Object.keys(sel).forEach(k => { sel[k] = null; }); defLine.textContent = DEF0; syncAll(); save(); } }, 'Effacer mon choix')),
+      hm ? hm.el : null, hist);
     open.addEventListener('click', () => panel.hidden ? show() : hide());
     panel.addEventListener('keydown', e => { if (e.key === 'Escape') { hide(); open.focus(); } });
     document.addEventListener('click', e => { const path = e.composedPath ? e.composedPath() : []; if (!panel.hidden && !path.includes(panel) && !path.includes(open) && !panel.contains(e.target) && !open.contains(e.target)) hide(); }); // composedPath : le bouton cliqué peut avoir été retiré de la page avant ce test
-    label(); bar.append(open, panel);
+    label(); paintGlobal(); bar.append(open, panel);
   };
 
   return { MOTS, quoteNodes, mount, attach, hideTip, DIMS };
