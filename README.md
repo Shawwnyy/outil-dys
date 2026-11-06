@@ -201,3 +201,11 @@ Le nombre de lunes évolue avec les découvertes : vérifie une source récente.
 - ⏸ **Pause / Reprendre** dans « Lecture audio ».
 - 🖨️ **Impression** : Ctrl+P masque le menu et les boutons, texte noir sur blanc, adresses des liens affichées.
 - ℹ️ **À propos** (Paramètres) : version, limites honnêtes, lien du code.
+
+## Mise à jour V2.2 : Dictée orale et Dactylographie
+
+**🎧 Dictée orale (Mes outils)** : un narrateur (la voix du navigateur, au choix dans la page) lit le texte en entier, puis groupe de mots par groupe de mots (≤ 9 mots) en disant la ponctuation (« virgule », « point »…), puis le relit. 12 textes originaux écrits pour l'outil (3 niveaux indicatifs, pas un programme officiel) ou « Mon propre texte ». Réglages : vitesse, temps pour écrire, ponctuation dite ou non, enchaînement automatique ou « Suivant ». Boutons : Répéter, Précédent, Suivant, Pause, Arrêter, Tout relire. La personne écrit sans voir le texte (correcteur du navigateur coupé, brouillon gardé). « J'ai terminé » donne : note indicative /20 (1 point par faute, 0,5 pour un accent, une majuscule ou une ponctuation), % de mots justes, la dictée avec les fautes marquées, le tableau faute par faute (ta version / correction / type / pourquoi), des conseils par type de faute, le texte exact (à réécouter), l'ajout des mots ratés à « Réviser mes dictées », et un historique local.
+
+**⌨️ Dactylographie (Mes outils)** : exercices (rangée de repos, mots, mots avec accents, phrases, un texte, mon texte, chrono 1 minute). Chrono dès la première touche, texte coloré lettre par lettre (juste / faux / lettre à taper, avec un fond plein pour les fautes : pas seulement la couleur), coller désactivé. Résultat : vitesse nette et brute (1 mot = 5 caractères), précision, retours en arrière, correction détaillée, touches à retravailler et bouton « S'entraîner sur ces touches », historique et courbe de progression locale. Option pour cacher le chrono (moins de pression). Pas de classement.
+
+**Comparateur de dictée amélioré** (`Dict.align`) : quand plusieurs mots faux se suivent, chaque mot est associé au mot attendu le plus proche (« baton » → « bâton », « a » → « à ») au lieu d'être listé « oublié » + « en trop ».

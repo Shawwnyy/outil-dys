@@ -26,6 +26,7 @@ const CORE = [
   'js/subjects.js',
   'js/revision.js',
   'js/dico.js',
+  'js/dictation.js',
   'js/recherche.js',
   'js/survol.js',
   'js/extras.js',

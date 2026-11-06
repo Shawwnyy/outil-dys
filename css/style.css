@@ -212,3 +212,10 @@ body.focus #infobar{display:none}
 dialog.xdlg{max-width:34rem;width:calc(100% - 2rem);border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:1.1rem 1.3rem}
 dialog.xdlg::backdrop{background:rgba(0,0,0,.55)}
 kbd{font:inherit;font-size:.9em;padding:.05rem .45rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;background:var(--soft);white-space:nowrap}
+
+/* dactylographie */
+.dk-target{font-size:1.45rem;line-height:2;letter-spacing:.02em;padding:.7rem .9rem;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin:.6rem 0;user-select:none}
+.dk-w{white-space:nowrap}.dk-c{border-radius:3px}.dk-c.sp{display:inline-block;min-width:.45em}
+.dk-c.pend{color:var(--muted)}.dk-c.ok{color:var(--ok);font-weight:600}.dk-c.bad{background:var(--bad);color:var(--accent-ink);font-weight:700}.dk-c.cur{outline:2px solid var(--accent);outline-offset:1px;background:var(--soft);color:var(--ink)}
+.dk-live{font-size:1.1rem;font-weight:700;margin:.2rem 0}
+#dictIn,#dkIn{font-size:1.2rem}

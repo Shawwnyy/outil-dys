@@ -225,8 +225,16 @@ const Dict = {
     const L = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1)); for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = eq(A[i], B[j]) ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
     const ops = []; let i = 0, j = 0;
     while (i < n || j < m) { if (i < n && j < m && eq(A[i], B[j])) { ops.push({ t: 'eq', a: A[i], b: B[j] }); i++; j++; } else if (j < m && (i === n || L[i][j + 1] >= L[i + 1][j])) ops.push({ t: 'ins', b: B[j++] }); else ops.push({ t: 'del', a: A[i++] }); }
-    const out = []; for (let k = 0; k < ops.length; k++) { const o = ops[k]; if (o.t === 'del' && ops[k + 1] && ops[k + 1].t === 'ins') { out.push({ t: 'sub', a: o.a, b: ops[k + 1].b }); k++; } else if (o.t === 'ins' && ops[k + 1] && ops[k + 1].t === 'del') { out.push({ t: 'sub', a: ops[k + 1].a, b: o.b }); k++; } else out.push(o); }
+    // un bloc de mots différents d'affilée : on associe chaque mot juste au mot écrit qui lui ressemble le plus (« baton » ↔ « bâton »), dans l'ordre
+    const out = []; for (let k = 0; k < ops.length;) { if (ops[k].t === 'eq') { out.push(ops[k++]); continue; } const D = [], I = []; while (k < ops.length && ops[k].t !== 'eq') { (ops[k].t === 'del' ? D : I).push(ops[k]); k++; } out.push(...this.pairRun(D, I)); }
     return out;
+  },
+  pairRun(D, I) {
+    const n = D.length, m = I.length; if (!n || !m) return [...D, ...I]; const GAP = .75, cost = (x, y) => { x = this.norm(x).toLowerCase(); y = this.norm(y).toLowerCase(); const sx = this.strip(x), sy = this.strip(y), c = this.lev(sx, sy) / Math.max(sx.length, sy.length, 1); return x === y ? 0 : Math.min(1, c + .05); }; // les accents comptent peu pour décider quels mots vont ensemble
+    const dp = Array.from({ length: n + 1 }, () => new Float64Array(m + 1)); for (let i = 1; i <= n; i++) dp[i][0] = i * GAP; for (let j = 1; j <= m; j++) dp[0][j] = j * GAP;
+    for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++) { const c = cost(D[i - 1].a, I[j - 1].b); dp[i][j] = Math.min(dp[i - 1][j] + GAP, dp[i][j - 1] + GAP, c <= .8 ? dp[i - 1][j - 1] + c : Infinity); }
+    const res = []; let i = n, j = m; while (i > 0 || j > 0) { if (i > 0 && j > 0 && cost(D[i - 1].a, I[j - 1].b) <= .8 && Math.abs(dp[i][j] - (dp[i - 1][j - 1] + cost(D[i - 1].a, I[j - 1].b))) < 1e-9) { res.unshift({ t: 'sub', a: D[i - 1].a, b: I[j - 1].b }); i--; j--; } else if (i > 0 && Math.abs(dp[i][j] - (dp[i - 1][j] + GAP)) < 1e-9) { res.unshift(D[i - 1]); i--; } else { res.unshift(I[j - 1]); j--; } }
+    return res;
   },
   classify(o) {
     const P = /^[^\p{L}\p{M}\d]$/u;
@@ -247,7 +255,7 @@ const Dict = {
 };
 App.reg({
   id: 'dictee', title: 'Dictée vocale et comparaison', group: 'outils', icon: '🎤', learn: true, render(el) {
-    el.append(h('h1', null, 'Dictée vocale et comparaison'), App.micWarn());
+    el.append(h('h1', null, 'Dictée vocale et comparaison'), App.micWarn(), h('p', { class: 'muted' }, 'Pour une dictée complète lue par un narrateur : ', h('a', { href: '#/dictee-orale' }, '🎧 Dictée orale'), '. Pour t’entraîner au clavier : ', h('a', { href: '#/dactylo' }, '⌨️ Dactylographie'), '.'));
     let tab = 'cmp'; const tabs = h('div', { class: 'row', role: 'tablist' }); const body = h('div');
     const draw = () => { tabs.replaceChildren(...[['cmp', 'Comparer ma dictée'], ['train', 'Entraînement à la dictée']].map(([k, l]) => h('button', { class: 'btn ' + (tab === k ? '' : 'sec'), role: 'tab', 'aria-selected': String(tab === k), onclick: () => { tab = k; draw(); } }, l))); body.replaceChildren(); (tab === 'cmp' ? cmp : train)(body); };
     const cmp = box => {
