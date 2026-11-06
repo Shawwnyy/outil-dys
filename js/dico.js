@@ -85,17 +85,20 @@ const Dico = (() => {
         mine(w) || '');
       const links = h('p', { class: 'muted' }, 'Ouvrir ailleurs (une page s’ouvre quand tu cliques) : ', LINKS(w).map(([t, u], i) => [i ? ' · ' : '', h('a', { href: u, target: '_blank', rel: 'noopener noreferrer' }, t)]));
       const body = h('div'); res.replaceChildren(head, body, links);
-      if (!online()) { body.append(h('p', { class: 'muted' }, 'Pour voir les définitions ici, coche « Autoriser la recherche en ligne dans le Wiktionnaire ».')); return; }
-      body.append(h('p', { class: 'muted' }, 'Recherche dans le Wiktionnaire…'));
+      const go = async () => { body.replaceChildren(h('p', { class: 'muted' }, 'Recherche dans le Wiktionnaire…'));
       try { let d = await define(w); if (d.missing && w !== w.toLowerCase()) d = await define(w.toLowerCase()); if (my !== ticket) return;
         const found = !d.missing && d.sections.length;
         body.replaceChildren(h('div', { class: 'notice ' + (found ? 'ok' : '') }, found ? `« ${d.title} » existe dans le Wiktionnaire (dictionnaire collaboratif en ligne : ce n’est pas un dictionnaire officiel).` : d.missing ? `« ${w} » n’a pas de page dans le Wiktionnaire. Vérifie l’orthographe ; un mot très récent ou très rare peut manquer.` : `Une page « ${d.title} » existe, mais je n’y ai pas trouvé de définition en français. Ouvre-la avec le lien Wiktionnaire.`),
           ...d.sections.map(s => h('div', null, h('h3', null, s.type + (s.flex ? ' (forme conjuguée ou accordée)' : '')), h('ol', null, s.defs.slice(0, 8).map(x => h('li', null, x))))),
           found ? h('p', { class: 'muted' }, 'Définitions lues automatiquement dans la page du Wiktionnaire (licence CC BY-SA) : la lecture peut oublier des détails. La fiche complète est sur le lien Wiktionnaire.') : '');
       } catch (e) { if (my === ticket) body.replaceChildren(h('div', { class: 'notice bad' }, 'La recherche en ligne n’a pas abouti (pas de connexion, ou accès bloqué sur cet appareil). Utilise les liens ci-dessous.')); } };
+      // hors ligne par défaut : un clic suffit pour chercher CE mot en ligne (il est envoyé à fr.wiktionary.org), sans rien régler
+      if (!online()) { body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: go }, '🌐 Voir la définition en ligne')), h('p', { class: 'muted' }, 'Le mot « ' + w + ' » sera envoyé à fr.wiktionary.org (Wikimedia), seulement quand tu cliques. Pour le faire à chaque recherche, coche « Autoriser la recherche en ligne » plus haut.')); return; }
+      go(); };
     const sug = async () => { const v = q.value.trim(); sugg.replaceChildren(); if (!online() || v.length < 2) return; const my = ++ticket; try { const list = await suggest(v); if (my !== ticket || q.value.trim() !== v) return; sugg.replaceChildren(...list.map(w => h('button', { class: 'btn sec', type: 'button', onclick: () => { sugg.replaceChildren(); show(w); } }, w))); } catch (e) { sugg.replaceChildren(); } };
     q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(sug, 350); }); q.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); clearTimeout(timer); sugg.replaceChildren(); show(q.value); } }); goBtn.addEventListener('click', () => { sugg.replaceChildren(); show(q.value); });
     paintNote(); box.append(h('p', { class: 'muted' }, 'Cherche un mot : écoute-le, découpe-le en syllabes, vois sa définition. Il n’existe aucun dictionnaire qui contienne « tous » les mots : le Wiktionnaire est le plus large des dictionnaires libres (il contient aussi les formes conjuguées et accordées), mais il n’est pas officiel et n’est jamais fini.'), note, h('div', { class: 'row' }, h('label', { for: 'dicoQ' }, 'Mot : '), q, goBtn), onlineCk, sugg, res);
+    { const pre = Store.get('dico.pre', ''); if (pre) { Store.set('dico.pre', ''); show(pre); } } // mot venu de la recherche de l'en-tête
     Dico.open = w => { q.value = w; show(w); };
   };
   const tabNew = box => {

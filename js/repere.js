@@ -1,4 +1,4 @@
-/* Outil Dys — Repérage dans l'espace : gauche/droite, trajets, quadrillage, points cardinaux, mots de position.
+/* Outil Dys — Repérage dans l'espace : mises en situation, gauche/droite, trajets, quadrillage, points cardinaux, mots de position.
    Mises en situation générées par calcul (rien n'est écrit à la main : les bonnes réponses sont calculées). */
 'use strict';
 
@@ -125,9 +125,81 @@ const Repere = (() => {
     b.append(Sub.notice('secondary', 'Les mots de position (sur, sous, dans, devant, derrière…) se ressemblent. Chaque mot est dessiné. Retiens la différence : « sur » touche, « au-dessus de » ne touche pas ; « sous » touche presque, « en dessous de » ne touche pas.'), h('h3', { style: 'margin-top:0' }, 'Les mots pour se situer'), cards, h('h3', null, 'Entraîne-toi'), quiz, fb, sc.el, h('div', { class: 'row' }, h('button', { class: 'btn', onclick: newQ }, 'Autre image'))); newQ();
   };
 
+
+  // ---------------------------------------------------------------- 0. mises en situation : un plan vu d'en haut, la personne est le rond « Toi »
+  // Tout est calculé à partir des positions (aucune réponse écrite à la main) : si la figure montre la porte à gauche, la réponse attendue est « à ta gauche ».
+  const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const SITS = [
+    { id: 'chambre', t: 'Ta chambre', intro: 'Tu es dans ta chambre.', obj: [['🚪', 'la porte'], ['🪟', 'la fenêtre'], ['🛏️', 'le lit'], ['📚', 'l’étagère'], ['🪑', 'le bureau'], ['🧸', 'le coffre à jouets']] },
+    { id: 'classe', t: 'La classe', intro: 'Tu es dans la salle de classe.', obj: [['🚪', 'la porte'], ['🪟', 'la fenêtre'], ['🟩', 'le tableau'], ['📚', 'la bibliothèque'], ['🗑️', 'la poubelle'], ['🧑‍🏫', 'le bureau du professeur']] },
+    { id: 'cuisine', t: 'La cuisine', intro: 'Tu es dans la cuisine.', obj: [['🚪', 'la porte'], ['🧊', 'le frigo'], ['🚰', 'l’évier'], ['🍳', 'la cuisinière'], ['🪑', 'la table'], ['🗑️', 'la poubelle']] },
+    { id: 'parc', t: 'Le parc', intro: 'Tu te promènes dans un parc.', obj: [['⛲', 'la fontaine'], ['🌳', 'l’arbre'], ['🛝', 'le toboggan'], ['🪑', 'le banc'], ['🚲', 'le vélo'], ['🌷', 'le massif de fleurs']] }];
+  const SEC = ['devant toi', 'à ta droite', 'derrière toi', 'à ta gauche'], SECC = ['#2a78d6', '#6250d6', '#eb6834', '#1baf7a'];
+  const faceOf = v => FACE.find(x => x.dx === v.dx && x.dy === v.dy);
+  // 0 devant, 1 droite, 2 derrière, 3 gauche ; -1 si l'objet est pile sur une diagonale (ambigu : on ne pose jamais cette question)
+  const sector = (a, f, o) => { const dx = o.x - a.x, dy = o.y - a.y, fw = dx * f.dx + dy * f.dy, r = right(f), rg = dx * r.dx + dy * r.dy; if (Math.abs(fw) === Math.abs(rg)) return -1; return Math.abs(fw) > Math.abs(rg) ? (fw > 0 ? 0 : 2) : (rg > 0 ? 1 : 3); };
+  const CELL = 62, PAD = 6, NN = 5;
+  const newScene = sid => { const S = sid ? SITS.find(x => x.id === sid) : pick(SITS), cells = Sub.shuffle([...Array(NN * NN).keys()]), take = () => { const c = cells.pop(); return { x: c % NN, y: Math.floor(c / NN) }; };
+    const a = take(), objs = Sub.shuffle(S.obj).slice(0, 5).map(o => ({ e: o[0], n: o[1], ...take() })); return { S, a, objs, f: pick(FACE) }; };
+  const plan = (sc, o = {}) => {
+    const W = NN * CELL + PAD * 2, f = o.f || sc.f, r = right(f), cx = p => PAD + (p.x + .5) * CELL, cy = p => PAD + (p.y + .5) * CELL, id = 'cp' + Math.random().toString(36).slice(2, 7);
+    const svg = mk('svg', { viewBox: `0 0 ${W} ${W}`, width: '100%', role: 'img', style: 'max-width:380px;display:block;margin:0 auto', 'aria-label': 'Plan vu d’en haut. ' + sc.S.intro + ' Le rond « Toi » regarde ' + f.n + '. ' + (sc.objs || []).map(x => x.n + ' : colonne ' + (x.x + 1) + ', ligne ' + (x.y + 1)).join(' ; ') });
+    svg.append(mk('defs', {}, mk('clipPath', { id }, mk('rect', { x: PAD, y: PAD, width: NN * CELL, height: NN * CELL }))));
+    for (let y = 0; y < NN; y++) for (let x = 0; x < NN; x++) svg.append(mk('rect', { x: PAD + x * CELL, y: PAD + y * CELL, width: CELL, height: CELL, fill: 'var(--panel)', stroke: 'var(--line)', 'stroke-width': 1 }));
+    if (o.help) { const c = { x: cx(sc.a), y: cy(sc.a) }, F = 1200, pt = (v, w) => (c.x + F * (v.dx + w.dx)) + ',' + (c.y + F * (v.dy + w.dy)), nf = { dx: -f.dx, dy: -f.dy }, nr = { dx: -r.dx, dy: -r.dy };
+      const wedge = (v, a1, a2, col, i) => mk('polygon', { points: `${c.x},${c.y} ${pt(v, a1)} ${pt(v, a2)}`, fill: col, opacity: .2, 'clip-path': `url(#${id})` });
+      svg.append(wedge(f, nr, r, SECC[0]), wedge(r, f, nf, SECC[1]), wedge(nf, r, nr, SECC[2]), wedge(nr, nf, f, SECC[3]));
+      [[f, 'devant', 0], [r, 'droite', 1], [nf, 'derrière', 2], [nr, 'gauche', 3]].forEach(([v, tx, i]) => { const x = Math.max(PAD + 24, Math.min(PAD + NN * CELL - 24, c.x + v.dx * 2 * CELL)), y = Math.max(PAD + 10, Math.min(PAD + NN * CELL - 6, c.y + v.dy * 2 * CELL)); const t = mk('text', { x, y, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: 'currentColor', stroke: 'var(--panel)', 'stroke-width': 3, 'paint-order': 'stroke', 'pointer-events': 'none' }); t.textContent = tx; svg.append(t); }); }
+    (sc.objs || []).forEach(x => { const t = mk('text', { x: cx(x), y: cy(x) + 1, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 32 }); t.textContent = x.e; svg.append(t); });
+    if (o.path) svg.append(mk('polyline', { points: o.path.map(p => cx(p) + ',' + cy(p)).join(' '), fill: 'none', stroke: '#15803d', 'stroke-width': 5, 'stroke-dasharray': '2 9', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    if (o.star) { const t = mk('text', { x: cx(o.star), y: cy(o.star) + 1, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 36 }); t.textContent = '⭐'; svg.append(t); }
+    const a = sc.a, tip = [cx(a) + f.dx * 29, cy(a) + f.dy * 29], b1 = [cx(a) + f.dx * 15 + r.dx * 11, cy(a) + f.dy * 15 + r.dy * 11], b2 = [cx(a) + f.dx * 15 - r.dx * 11, cy(a) + f.dy * 15 - r.dy * 11];
+    svg.append(mk('polygon', { points: [tip, b1, b2].map(q => q.join(',')).join(' '), fill: '#1d4ed8', stroke: '#fff', 'stroke-width': 2, 'stroke-linejoin': 'round' }), mk('circle', { cx: cx(a), cy: cy(a), r: 16, fill: '#1d4ed8', stroke: '#fff', 'stroke-width': 2.5 }));
+    const tt = mk('text', { x: cx(a), y: cy(a) + 1, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 11, 'font-weight': 700, fill: '#fff' }); tt.textContent = 'Toi'; svg.append(tt); return svg; };
+  const genRoute = () => { for (let t = 0; t < 300; t++) { const a = { x: Sub.rnd(0, NN - 1), y: Sub.rnd(0, NN - 1) }, f0 = pick(FACE), k1 = Sub.rnd(1, 3), k2 = Sub.rnd(1, 3), turn = pick(['left', 'right']), f1 = turn === 'left' ? left(f0) : right(f0), m = { x: a.x + f0.dx * k1, y: a.y + f0.dy * k1 }, e = { x: m.x + f1.dx * k2, y: m.y + f1.dy * k2 }; if ([m, e].every(q => q.x >= 0 && q.x < NN && q.y >= 0 && q.y < NN)) return { a, f0, k1, k2, turn, m, e }; } };
+  const endOf = (a, f0, k1, k2, turn) => { const f1 = turn === 'left' ? left(f0) : right(f0); return { x: a.x + f0.dx * k1 + f1.dx * k2, y: a.y + f0.dy * k1 + f1.dy * k2 }; };
+  const routeTxt = (k1, turn, k2) => `Avance de ${k1} case${k1 > 1 ? 's' : ''}, tourne à ${turn === 'left' ? 'gauche' : 'droite'}, puis avance de ${k2} case${k2 > 1 ? 's' : ''}.`;
+  const tabSit = b => {
+    const sc = score(), prefs = Store.get('repere.sit', { mode: 'where', help: false, set: '' }); let mode = prefs.mode, help = !!prefs.help, setId = prefs.set || '', st = null;
+    const MODES = [['where', 'Où est… ?'], ['turn', 'Je me retourne'], ['see', 'Que vois-tu ?'], ['route', 'Quel chemin ?']];
+    const modeRow = h('div', { class: 'row', role: 'group', 'aria-label': 'Type de situation' }), view = h('div'), fb = h('p', { 'aria-live': 'polite' });
+    const sel = h('select', { 'aria-label': 'Lieu', onchange: ev => { setId = ev.target.value; save(); newQ(); } }, h('option', { value: '' }, 'Lieu au hasard'), SITS.map(x => h('option', { value: x.id, selected: x.id === setId }, x.t)));
+    const chk = h('input', { type: 'checkbox', checked: help, onchange: ev => { help = ev.target.checked; save(); if (st && !st.done) draw(); } });
+    const save = () => Store.set('repere.sit', { mode, help, set: setId });
+    const paintModes = () => modeRow.replaceChildren(...MODES.map(m => h('button', { class: 'btn ' + (m[0] === mode ? '' : 'sec'), type: 'button', 'aria-pressed': String(m[0] === mode), onclick: () => { mode = m[0]; save(); paintModes(); newQ(); } }, m[1])));
+    const legend = sc2 => h('p', { class: 'muted', style: 'text-align:center;margin:.3rem 0' }, sc2.objs.map(x => x.e + ' ' + x.n).join('  ·  '));
+    const answer = (ok, msg, revealSvg) => { st.done = true; sc.add(ok); fb.replaceChildren(h('b', null, ok ? '✅ Oui ! ' : '❌ Pas tout à fait. '), msg); if (revealSvg) st.box.replaceChildren(revealSvg, ...(st.legend ? [st.legend] : [])); };
+    const draw = () => { st.box.replaceChildren(plan(st.sc, { f: st.f, help }), ...(st.legend ? [st.legend] : [])); };
+    const newQ = () => { fb.textContent = ''; const sc1 = newScene(setId); let q = '', opts = [], tellOK = null, f = sc1.f, extra = '';
+      const box = h('div'), qEl = h('p', { style: 'font-weight:600;font-size:1.1em' }), ans = h('div', { class: 'row', style: 'justify-content:center' });
+      st = { sc: sc1, f, done: false, box, legend: null };
+      if (mode === 'route') { const R = genRoute(); st.sc = { S: sc1.S, a: R.a, f: R.f0, objs: [] }; st.f = R.f0; st.R = R;
+        const good = routeTxt(R.k1, R.turn, R.k2), flip = R.turn === 'left' ? 'right' : 'left', cand = [[R.k1, flip, R.k2], [R.k2, R.turn, R.k1], [R.k2, flip, R.k1], [Math.min(3, R.k1 + 1), R.turn, R.k2], [R.k1, R.turn, Math.min(3, R.k2 + 1)]];
+        const seen = new Set([good]), wrong = []; Sub.shuffle(cand).forEach(c => { const t = routeTxt(...c), e = endOf(R.a, R.f0, c[0], c[2], c[1]); if (!seen.has(t) && !(e.x === R.e.x && e.y === R.e.y)) { seen.add(t); wrong.push(t); } });
+        opts = Sub.shuffle([good, ...wrong.slice(0, 2)]); q = `${sc1.S.intro} Tu veux aller jusqu’à l’étoile ⭐. Le rond « Toi » regarde ${R.f0.n}. Quelle consigne te mène à l’étoile ?`;
+        qEl.textContent = q; box.append(plan(st.sc, { f: R.f0, help, star: R.e }));
+        opts.forEach(t => ans.append(h('button', { class: 'btn sec', type: 'button', style: 'text-align:left', onclick: () => { if (st.done) return; const ok = t === good; answer(ok, ok ? 'Tu avances, tu tournes du bon côté, puis tu avances encore.' : `La bonne consigne : « ${good} » Le chemin vert montre le trajet.`, plan(st.sc, { f: R.f0, help: false, star: R.e, path: [R.a, R.m, R.e] })); } }, t)));
+      } else {
+        const ok = x => x.filter(o => sector(sc1.a, f, o) >= 0);
+        if (mode === 'where') { const o = pick(ok(sc1.objs)) || sc1.objs[0]; const s = sector(sc1.a, f, o); q = `${sc1.S.intro} Tu regardes ${f.n} (la flèche). Où se trouve ${o.n} ${o.e} ?`; st.legend = legend(sc1);
+          opts = SEC.map((t, i) => [t, i === s]); tellOK = () => `${cap(o.n)} est ${SEC[s]} : tu regardes ${f.n}, donc ta droite est ${scr(right(f))} sur le plan et ta gauche ${scr(left(f))}.`; }
+        if (mode === 'turn') { const T = pick([['Tu fais demi-tour', { dx: -f.dx, dy: -f.dy }], ['Tu tournes d’un quart de tour à droite', right(f)], ['Tu tournes d’un quart de tour à gauche', left(f)]]), nf = faceOf(T[1]); const c = sc1.objs.filter(o => { const a = sector(sc1.a, f, o), z = sector(sc1.a, nf, o); return z >= 0 && a >= 0 && z !== a; }); const o = pick(c.length ? c : ok(sc1.objs)) || sc1.objs[0];
+          const s = sector(sc1.a, nf, o); q = `${sc1.S.intro} Tu regardes ${f.n}. ${T[0]}. Où se trouve maintenant ${o.n} ${o.e} ?`; st.legend = legend(sc1); opts = SEC.map((t, i) => [t, i === s]); st.after = nf;
+          tellOK = () => `Après ce mouvement, tu regardes ${nf.n}. ${cap(o.n)} est ${SEC[s]}.`; }
+        if (mode === 'see') { let cnt, cand; for (let t = 0; t < 80; t++) { cnt = i => sc1.objs.filter(o => sector(sc1.a, f, o) === i); cand = [0, 1, 2, 3].filter(i => cnt(i).length === 1); if (cand.length) break; Object.assign(sc1, newScene(setId)); f = sc1.f; st.sc = sc1; st.f = f; } // il faut un côté où il n'y a qu'UN objet, sinon la question serait ambiguë
+          const s = pick(cand), o = cnt(s)[0];
+          q = `${sc1.S.intro} Tu regardes ${f.n}. Quel objet se trouve ${SEC[s]} ?`; const others = Sub.shuffle(sc1.objs.filter(x => x !== o)).slice(0, 3); opts = Sub.shuffle([o, ...others]).map(x => [x.e + ' ' + x.n, x === o]); tellOK = () => `C’est ${o.n} ${o.e} : il est ${SEC[s]}.`; st.legend = null; }
+        qEl.textContent = q; box.append(plan(sc1, { f, help }), ...(st.legend ? [st.legend] : []));
+        opts.forEach(([t, good]) => ans.append(h('button', { class: 'btn sec', type: 'button', onclick: () => { if (st.done) return; answer(good, tellOK(), plan(sc1, { f: st.after || f, help: true })); } }, cap(t))));
+      }
+      st.box = box; st.q = q; view.replaceChildren(box, qEl, h('div', { class: 'row', style: 'justify-content:center' }, Sub.speakBtn(() => st.q, '🔊 Écouter la consigne')), ans); };
+    b.append(Sub.notice('secondary', h('b', null, 'Mises en situation : '), 'un plan vu d’en haut, comme sur une feuille. Tu es le rond bleu « Toi » ; la flèche montre là où tu regardes. Prends ton temps : il n’y a pas de chronomètre. Les bonnes réponses sont calculées à partir du plan, jamais écrites à la main.'),
+      h('div', { class: 'row', style: 'align-items:center' }, modeRow, sel, h('label', { class: 'chk', title: 'Colorie les zones devant / à droite / derrière / à gauche autour de toi' }, chk, 'Aide : montrer les zones')), view, fb, sc.el, h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', onclick: newQ }, 'Autre situation')));
+    paintModes(); newQ(); };
+
   App.reg({ id: 'mode-spatial', title: 'Repérage dans l’espace', group: 'modes', icon: '🧭', learn: true, render(el) {
-    el.append(h('h1', null, '🧭 Repérage dans l’espace'), Sub.notice('secondary', h('b', null, 'Pour qui ? '), 'pour toute personne qui veut s’entraîner à se repérer : gauche et droite, suivre un plan, lire un quadrillage, utiliser les points cardinaux. C’est un entraînement facultatif : il ne pose aucun diagnostic et n’est pas une solution valable pour tout le monde. Les situations sont générées au hasard et les réponses sont calculées.'));
-    Sub.tabs(el, [['Gauche / droite', tabGD], ['Suivre un trajet', tabTrajet], ['Quadrillage', tabCoord], ['Points cardinaux', tabCardinaux], ['Mots de position', tabMots]]);
+    el.append(h('h1', null, '🧭 Repérage dans l’espace'), Sub.notice('secondary', h('b', null, 'Pour qui ? '), 'pour toute personne qui veut s’entraîner à se repérer : mises en situation (ta chambre, la classe, la cuisine, le parc), gauche et droite, suivre un plan, lire un quadrillage, utiliser les points cardinaux. C’est un entraînement facultatif : il ne pose aucun diagnostic et n’est pas une solution valable pour tout le monde. Les situations sont générées au hasard et les réponses sont calculées.'));
+    Sub.tabs(el, [['Mises en situation', tabSit], ['Gauche / droite', tabGD], ['Suivre un trajet', tabTrajet], ['Quadrillage', tabCoord], ['Points cardinaux', tabCardinaux], ['Mots de position', tabMots]]);
   } });
   return { FACE, left, right, relVec, scr };
 })();

@@ -132,7 +132,8 @@ if (typeof App !== 'undefined') {
     }; nxt.addEventListener('click', () => { i = Math.min(stops.length - 1, i + 1); show(); }); prv.addEventListener('click', () => { i = Math.max(0, i - 1); show(); });
     b.append(Sub.notice('secondary', 'Parcours guidé : une étape à la fois, pour ne pas surcharger l’écran. Données NASA datées du ' + SPACE.updated + '. Le trajet en avion est un calcul de comparaison (distance ÷ 900 km/h), pas une donnée scientifique.'), h('h3', { style: 'margin-top:0' }, 'Voyage dans l’espace'), prog, card, h('div', { class: 'row' }, prv, nxt), srcNote()); show();
   };
-  App.reg({ id: 'espace', title: 'Astronomie et espace', group: 'matieres', icon: '🪐', learn: true, render(el) {
+  App.reg({ id: 'espace', title: 'Astronomie et espace', group: 'matieres', icon: '🪐', learn: true, hidden: true, render(el) { if (!/[?&]astro=1/.test(location.search)) { location.hash = '#/mode-spatial'; return; } // module astronomie (données NASA) retiré des menus à la demande ; il reste dans le code (ajoute ?astro=1 à l'adresse pour le revoir)
+
     el.append(h('h1', null, '🪐 Astronomie et espace'), Sub.notice('secondary', h('b', null, 'Données vérifiées et datées : '), `valeurs de la fiche planétaire de la NASA (mise à jour du ${SPACE.updated}, consultée le ${SPACE.consulted}). Rien d’autre n’est affiché comme un fait scientifique. Pas d’images de la NASA : aucune n’est fournie localement.`), Sub.courseBox('astronomie'));
     Sub.tabs(el, [['Voyage guidé', tabVoyage], ['Système solaire', tabSystem], ['Phases de la Lune', tabLune], ['Saisons', tabSaisons], ['Éclipses', tabEclipses], ['Fiches des planètes', tabFiche], ['Comparer', tabCompare], ['Ordre des planètes (jeu)', tabOrder], ['Quiz', tabQuiz], ['Calculs : poids, lumière', tabCalc]]);
   } });

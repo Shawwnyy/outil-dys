@@ -94,11 +94,11 @@ table.t{border-collapse:collapse;width:100%}table.t th,table.t td{border:1px sol
 
 /* bandeau du haut : date, heure à la seconde, citation */
 #top{flex-wrap:wrap}
-#infobar{flex:1 0 100%;min-width:0;overflow-wrap:anywhere;order:20;display:flex;flex-wrap:wrap;align-items:center;gap:.35rem 1.3rem;border-top:1px solid var(--line);padding-top:.5rem;margin-top:.1rem;font-size:1.25rem;position:relative}
+#infobar{flex:1 0 100%;min-width:0;overflow-wrap:anywhere;order:20;display:flex;flex-wrap:wrap;align-items:center;gap:.35rem 1.3rem;border-top:1px solid var(--line);padding-top:.5rem;margin-top:.1rem;font-size:1.15rem;position:relative}
 #infobar[hidden]{display:none}
 .ib-when{min-width:0;overflow-wrap:anywhere}
 .ib-time{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);display:inline-block;min-width:5.6em;font-size:1.45em;line-height:1.2}
-.ib-quote{flex:1 1 22rem;font-style:italic;min-width:0;font-size:1.05em;line-height:1.4}
+.ib-quote{flex:1 1 13rem;font-style:italic;min-width:0;font-size:1.05em;line-height:1.4}
 .ib-src{font-style:normal;color:var(--muted);font-size:.78em}
 .ib-next,.ib-etat{min-height:2.6rem;padding:.2rem .9rem;font-size:.9em}.ib-emo{letter-spacing:.15em}
 body.focus #infobar{display:none}
@@ -172,3 +172,21 @@ body.focus #infobar{display:none}
 .hm-tile{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:.5rem .8rem;display:flex;flex-direction:column;gap:.1rem}.hm-tl{font-size:.85rem;color:var(--muted)}.hm-tv{font-size:1.5rem;font-variant-numeric:tabular-nums}.hm-ts{font-size:.82rem;color:var(--muted)}
 .hm-table{margin-top:.7rem}.hm-table summary{cursor:pointer;font-weight:600}.hm-scroll{overflow:auto;max-height:16rem;margin-top:.4rem}.hm-table table{border-collapse:collapse;width:100%;font-size:.92rem;font-variant-numeric:tabular-nums}.hm-table th,.hm-table td{padding:.3rem .6rem;border-bottom:1px solid var(--line);text-align:left}.hm-table thead th{position:sticky;top:0;background:var(--panel)}
 .hm-note{font-size:.85rem;color:var(--muted);margin:.6rem 0 0}
+
+/* en-tête : lisible à tous les niveaux de zoom du navigateur. Sur un écran peu haut (zoom 150 % et plus), l'en-tête n'est plus collé en haut : il défile avec la page au lieu de manger l'écran. */
+@media (max-height:620px){#top{position:static}}
+.ib-when{order:1}.ib-quote{order:2}.ib-next{order:3}.ib-etat{order:4}
+@media (max-width:900px){#infobar{font-size:1.1rem}.ib-time{font-size:1.35em}}
+@media (max-width:900px){#top .lbl{display:none}#logo{height:36px}#brand{font-size:1.2rem}}
+
+/* recherche dans l'en-tête : outils + mots + dictionnaire */
+.gs{position:relative;flex:1 1 16rem;max-width:30rem;min-width:11rem;display:flex;align-items:center;margin-left:.4rem}
+.gs input{width:100%;font:inherit;font-size:1rem;min-height:2.6rem;padding:.2rem .9rem .2rem 2.3rem;border:2px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink)}
+.gs input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.gs-ico{position:absolute;left:.8rem;pointer-events:none;font-size:1rem}
+.gs-res{position:absolute;left:0;top:calc(100% + .45rem);width:min(36rem,92vw);max-height:72vh;overflow:auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.35);padding:.5rem .9rem .8rem;z-index:50;line-height:1.45}
+.gs-res[hidden]{display:none}.gs-h{font-size:.85rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:.7rem 0 .3rem}
+.gs-l{list-style:none;margin:0;padding:0}.gs-l a{display:block;padding:.4rem .5rem;border-radius:8px;color:inherit;text-decoration:none;font-weight:600}.gs-l a:hover,.gs-l a:focus-visible{background:var(--soft);outline:2px solid var(--accent)}
+.gs-w{position:relative;padding:.45rem 2.6rem .45rem .6rem;margin:.3rem 0;background:var(--bg);border:1px solid var(--line);border-radius:10px}.gs-w ol{margin:.2rem 0 0;padding-left:1.2rem}.gs-w .btn{position:absolute;right:.3rem;top:.3rem}
+.gs-d{margin:.5rem 0}
+@media (max-width:900px){.gs{flex:1 0 100%;order:15;max-width:none;margin-left:0}.gs-res{width:100%}}

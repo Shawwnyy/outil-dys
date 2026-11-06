@@ -107,7 +107,7 @@ const App = {
     this.stopSpeak(); this.hidePop();
     try { mod.render(main); } catch (e) { console.error(e); main.append(h('div', { class: 'notice bad' }, `Erreur dans ce module : ${e.message}`)); }
     $$('#nav a').forEach(a => { if (a.dataset.id === mod.id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-    document.title = mod.title + ' — Outil Dys';
+    document.title = 'Outil Dys — ' + mod.title; // « Outil Dys » en premier : visible même quand l'onglet est étroit
     { const cur = $('#nav a[aria-current]'); const d = cur && cur.closest('details'); if (d) d.open = true; if (!keep && this.narrowNav) this.narrowNav(); }
     if (keep) { if (fidx >= 0) { const el = main.querySelectorAll(fsel)[fidx]; if (el) el.focus({ preventScroll: true }); } window.scrollTo(0, y); }
     else { main.focus({ preventScroll: true }); window.scrollTo(0, 0); }
@@ -135,7 +135,7 @@ const App = {
     $('#menuBtn').addEventListener('click', () => { const hide = document.body.classList.toggle('nav-hidden'); $('#menuBtn').setAttribute('aria-expanded', String(!hide)); });
     $('#focusBtn').addEventListener('click', () => this.toggleFocus());
     const bump = d => { const n = Math.max(14, Math.min(32, (+this.prefs.size || 18) + d)); this.prefs.size = n; this.savePrefs(); this.toast('Taille du texte : ' + n + ' px' + (n === 14 || n === 32 ? ' (limite)' : '')); };
-    $('#aMinus').addEventListener('click', () => bump(-2)); $('#aPlus').addEventListener('click', () => bump(2)); this.initReadSel(); this.initBar();
+    $('#aMinus').addEventListener('click', () => bump(-2)); $('#aPlus').addEventListener('click', () => bump(2)); this.initReadSel(); this.initBar(); if (typeof Recherche !== 'undefined') Recherche.init();
     if (this.feat('focus')) document.body.classList.add('focus');
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { this.hidePop(); this.stopSpeak(); }
@@ -345,7 +345,7 @@ App.reg({
     const nDue = typeof Rev !== 'undefined' ? Rev.dueList().length : 0;
     const sections = [
       ['✍️ Écrire, lire, réviser', [['correcteur', '✍️', 'Corriger un texte', 'Les fautes sont colorées selon 15 catégories, avec explications.'], ['revision', '🔁', 'Réviser mes dictées', nDue ? `${nDue} mot${nDue > 1 ? 's' : ''} à réviser maintenant.` : 'Garde les mots ratés en dictée et révise-les en courtes séances.'], ['lecture', '🔊', 'Écouter un texte', 'Lecture à voix haute avec la voix de ton choix, syllabes, règle de lecture.'], ['dico', '📖', 'Dictionnaire', 'Chercher un mot, mots nouveaux 2026-2027, mots qui se ressemblent.'], ['dictee', '🎤', 'Dictée vocale', 'Dicte ton texte ou compare ta dictée à un modèle.']]],
-      ['🧭 Me repérer', [['mode-spatial', '🧭', 'Repérage dans l’espace', 'Gauche et droite, trajets pas à pas, quadrillage, points cardinaux.'], ['maths', '🔢', 'Mathématiques visuelles', 'Calculs étape par étape, droite numérique, fractions.'], ['matieres', '📚', 'Mes matières', 'Géographie, histoire, langues, sciences, informatique…']]],
+      ['🧭 Me repérer', [['mode-spatial', '🧭', 'Repérage dans l’espace', 'Mises en situation (chambre, classe, cuisine, parc), gauche et droite, trajets, quadrillage, points cardinaux.'], ['maths', '🔢', 'Mathématiques visuelles', 'Calculs étape par étape, droite numérique, fractions.'], ['matieres', '📚', 'Mes matières', 'Géographie, histoire, langues, sciences, informatique…']]],
       ['📚 Comprendre mes cours', [['analyse', '📚', 'Comprendre mon cours', 'Importe un cours : passages difficiles, définitions, version simple.'], ['simplif', '🧩', 'Simplifier', 'Phrases plus courtes, mots expliqués, liste, tableau.'], ['fiches', '🗂️', 'Fiches, cartes mentales, quiz', 'À partir de n’importe quel document.'], ['slides', '📊', 'Analyser un PowerPoint', 'Fautes, lisibilité, contrastes, mise en page — et export corrigé.']]],
       ['🌱 Mon espace', [['profil', '🧭', 'Mes besoins et préférences', 'Police, espacements, règle, concentration…'], ['sante', '🩺', 'Trouver un professionnel de santé', 'Carte de France par région, recherche par nom ou téléphone, carnet privé.'], ['defis', '🧩', 'Défis (facultatif)', 'Suites logiques, nombres premiers, estimations.']]]
     ];

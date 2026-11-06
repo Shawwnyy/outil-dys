@@ -73,7 +73,7 @@ const SUBJECTS = [
   ['maths', 'Mathématiques', '🔢', ''], ['geo', 'Géographie', '🌍', 'Repères, latitude et longitude, capitales, et tes propres données.'],
   ['histoire', 'Histoire', '🏛️', 'Repères de la tradition scolaire française, frise chronologique à l’échelle, calculs de durées et de siècles.'],
   ['sciences', 'Sciences', '🔬', 'Démarche d’investigation guidée pour écrire un compte rendu d’expérience.'],
-  ['espace', 'Astronomie et espace', '🪐', ''], ['langues', 'Langues', '🗣️', 'Vocabulaire : tes cartes, prononciation, entraînement.'],
+  ['mode-spatial', 'Repérage dans l’espace', '🧭', 'Mises en situation, gauche et droite, trajets, quadrillage, points cardinaux.'], ['langues', 'Langues', '🗣️', 'Vocabulaire : tes cartes, prononciation, entraînement.'],
   ['info', 'Informatique', '💻', 'Conversions binaire, décimal, hexadécimal avec les étapes.'],
   ['culture', 'Culture générale', '🎓', 'Tes propres fiches questions / réponses, avec entraînement.'], ['autres', 'Autres matières', '📌', 'Ton cours, tes cartes, tes fiches : pour toute autre matière.']
 ];
@@ -82,7 +82,7 @@ const subjectPage = (id, extra) => el => {
 };
 App.reg({ id: 'matieres', title: 'Toutes mes matières', group: 'matieres', icon: '📚', render(el) {
   el.append(h('h1', null, 'Mes matières'), h('p', { class: 'muted' }, 'Chaque matière donne accès à ton cours et aux outils de lecture, simplification, fiches et quiz, plus des outils propres à la matière quand ils existent vraiment.'),
-    h('div', { class: 'grid g3' }, SUBJECTS.map(([id, t, ic, d]) => h('a', { class: 'card', href: '#/' + (id === 'maths' || id === 'espace' ? id : 'm-' + id), style: 'text-decoration:none;color:inherit' }, h('h3', { style: 'margin-top:0' }, ic + ' ' + t), h('p', { class: 'muted' }, d || (id === 'maths' ? 'Calcul pas à pas, droite numérique, fractions, quantités, tables, unités.' : 'Système solaire, fiches des planètes (données NASA datées), activités.'))))));
+    h('div', { class: 'grid g3' }, SUBJECTS.map(([id, t, ic, d]) => h('a', { class: 'card', href: '#/' + (id === 'maths' || id === 'mode-spatial' ? id : 'm-' + id), style: 'text-decoration:none;color:inherit' }, h('h3', { style: 'margin-top:0' }, ic + ' ' + t), h('p', { class: 'muted' }, d || (id === 'maths' ? 'Calcul pas à pas, droite numérique, fractions, quantités, tables, unités.' : 'Système solaire, fiches des planètes (données NASA datées), activités.'))))));
   el.append(Sub.notice('secondary', h('b', null, 'Honnêteté : '), 'il n’y a pas de carte du monde interactive, de drapeaux, de populations ou de frises historiques préremplies : je n’ai pas de jeu de données local vérifié et daté pour cela, et je ne les invente pas. Tu peux importer tes propres données dans Géographie et Histoire.'));
 } });
 // les pages « m-xxx » (id interne) pour éviter de masquer les modules maths / espace
