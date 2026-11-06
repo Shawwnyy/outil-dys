@@ -28,7 +28,7 @@ const FONTS = {
   opendys: ['OpenDyslexic (si installée)', 'OpenDyslexic,"Open Dyslexic",Verdana,Arial,sans-serif'], lexend: ['Lexend (si installée)', 'Lexend,Verdana,Arial,sans-serif'],
   georgia: ['Georgia', 'Georgia,serif'], mono: ['Chasse fixe', '"Courier New",monospace']
 };
-const DEFAULT_PREFS = { colors: {}, font: 'system', size: 18, letterSp: 0, wordSp: 0, paraSp: 1, lineH: 1.6, theme: 'auto', ttsRate: 1, voice: '', lang: 'fr', simplLevel: 'simple', explainLevel: 'court', showCorrect: true, showIcons: true, minSlideFont: 18, autoAnalyse: true, softTypo: true, timerMin: 25, showBar: true, hoverDef: true };
+const DEFAULT_PREFS = { colors: {}, font: 'system', size: 18, letterSp: 0, wordSp: 0, paraSp: 1, lineH: 1.6, theme: 'auto', ttsRate: 1, voice: '', lang: 'fr', simplLevel: 'simple', explainLevel: 'court', showCorrect: true, showIcons: true, minSlideFont: 18, autoAnalyse: true, softTypo: true, timerMin: 25, showBar: true, hoverDef: true, reduceMotion: false };
 const PROFILES = [
   { g: 'Troubles spécifiques des apprentissages', items: [['dyslexie', 'Dyslexie'], ['dysortho', 'Dysorthographie'], ['dysgraphie', 'Dysgraphie'], ['dyscalculie', 'Dyscalculie'], ['dyspraxie', 'Dyspraxie / trouble développemental de la coordination'], ['dysphasie', 'Dysphasie / trouble développemental du langage'], ['associes', 'Troubles associés']] },
   { g: 'Autres profils et besoins', items: [['tdah', 'TDAH'], ['hpi', 'HPI'], ['concentration', 'Difficultés de concentration'], ['memo', 'Difficultés de mémorisation'], ['lecture', 'Difficultés de lecture'], ['ecriture', "Difficultés d'écriture"], ['compre', 'Difficultés de compréhension'], ['organisation', "Difficultés d'organisation"], ['spatial', 'Difficultés de repérage spatial'], ['visuel', 'Sensibilité aux stimulations visuelles'], ['simplifie', 'Besoin de supports simplifiés'], ['consignes', 'Besoin de consignes courtes'], ['repetitions', 'Besoin de répétitions'], ['audio', "Besoin d'accompagnement audio"]] }
@@ -74,10 +74,10 @@ const App = {
     if (this.feat('airy')) { lh = Math.max(lh, 1.9); ps = Math.max(ps, 1.6); }
     r.setProperty('--font', FONTS[font][1]); r.setProperty('--fs', p.size + 'px'); r.setProperty('--ls', ls + 'em'); r.setProperty('--ws', ws + 'em'); r.setProperty('--lh', lh); r.setProperty('--ps', ps);
     const dark = p.theme === 'dark' || (p.theme === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
-    root.dataset.theme = dark ? 'dark' : 'light';
+    root.dataset.theme = p.theme === 'sepia' ? 'sepia' : p.theme === 'contrast' ? 'contrast' : dark ? 'dark' : 'light';
     r.setProperty('--c-correct', this.color('correct'));
     document.body.classList.toggle('big', this.feat('bigTargets'));
-    document.body.classList.toggle('calm', this.feat('calmVisual'));
+    document.body.classList.toggle('calm', this.feat('calmVisual') || p.reduceMotion === true);
     const ruler = $('#ruler'); if (ruler) ruler.hidden = !this.feat('ruler');
     const ib = $('#infobar'); if (ib) ib.hidden = p.showBar === false;
     const tb = $('#timerBox'); if (tb) tb.hidden = !this.feat('timer') && !this.timerOn;
@@ -106,6 +106,7 @@ const App = {
     main.replaceChildren();
     this.stopSpeak(); this.hidePop();
     try { mod.render(main); } catch (e) { console.error(e); main.append(h('div', { class: 'notice bad' }, `Erreur dans ce module : ${e.message}`)); }
+    try { if (typeof Extras !== 'undefined') Extras.afterRoute(mod, main); } catch (e) { console.error(e); }
     $$('#nav a').forEach(a => { if (a.dataset.id === mod.id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     document.title = 'Outil Dys — ' + mod.title; // « Outil Dys » en premier : visible même quand l'onglet est étroit
     { const cur = $('#nav a[aria-current]'); const d = cur && cur.closest('details'); if (d) d.open = true; if (!keep && this.narrowNav) this.narrowNav(); }
@@ -135,7 +136,7 @@ const App = {
     $('#menuBtn').addEventListener('click', () => { const hide = document.body.classList.toggle('nav-hidden'); $('#menuBtn').setAttribute('aria-expanded', String(!hide)); });
     $('#focusBtn').addEventListener('click', () => this.toggleFocus());
     const bump = d => { const n = Math.max(14, Math.min(32, (+this.prefs.size || 18) + d)); this.prefs.size = n; this.savePrefs(); this.toast('Taille du texte : ' + n + ' px' + (n === 14 || n === 32 ? ' (limite)' : '')); };
-    $('#aMinus').addEventListener('click', () => bump(-2)); $('#aPlus').addEventListener('click', () => bump(2)); this.initReadSel(); this.initBar(); if (typeof Recherche !== 'undefined') Recherche.init(); if (typeof Survol !== 'undefined') Survol.init();
+    $('#aMinus').addEventListener('click', () => bump(-2)); $('#aPlus').addEventListener('click', () => bump(2)); this.initReadSel(); this.initBar(); if (typeof Recherche !== 'undefined') Recherche.init(); if (typeof Survol !== 'undefined') Survol.init(); if (typeof Extras !== 'undefined') Extras.init();
     if (this.feat('focus')) document.body.classList.add('focus');
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { this.hidePop(); this.stopSpeak(); }
@@ -285,7 +286,7 @@ const App = {
     const fd = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), ft = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const dateEl = h('span', { class: 'ib-date' }), timeEl = h('time', { class: 'ib-time', role: 'timer', 'aria-label': 'Heure' }), q = h('span', { class: 'ib-quote' });
     const minute = () => Math.floor(Date.now() / 60000), N = CITATIONS.length, step = [7, 11, 13, 5, 3, 1].find(k => { let x = k, y = N; while (y) [x, y] = [y, x % y]; return x === 1; }); let shift = 0, lastMin = -1; // une nouvelle citation chaque minute, dans un ordre mélangé
-    const quote = () => { const [t, a] = CITATIONS[(minute() * step + shift) % N]; q.replaceChildren('« ', ...(typeof Bandeau !== 'undefined' ? Bandeau.quoteNodes(t) : [t]), ' »', h('span', { class: 'ib-src' }, ' — ' + a)); };
+    const quote = () => { const [t, a] = CITATIONS[(minute() * step + shift) % N]; q.replaceChildren('«\u00a0', ...(typeof Bandeau !== 'undefined' ? Bandeau.quoteNodes(t) : [t]), '\u00a0»', h('span', { class: 'ib-src' }, ' — ' + a)); };
     const tick = () => { const d = new Date(), ds = fd.format(d); const dd = ds.charAt(0).toUpperCase() + ds.slice(1); if (dateEl.textContent !== dd) dateEl.textContent = dd; const mk = minute(); if (mk !== lastMin) { lastMin = mk; shift = 0; quote(); } timeEl.textContent = ft.format(d); };
     const loop = () => { tick(); setTimeout(loop, 1000 - (Date.now() % 1000) + 8); };
     bar.replaceChildren(h('span', { class: 'ib-when' }, h('span', { 'aria-hidden': 'true' }, '📅 '), dateEl, h('span', { class: 'ib-sep', 'aria-hidden': 'true' }, ' · '), h('span', { 'aria-hidden': 'true' }, '🕘 '), timeEl), q, h('button', { class: 'btn ghost ib-next', title: 'La citation change toute seule chaque minute. Touche pour en voir une autre tout de suite.', 'aria-label': 'Voir une autre citation', onclick: () => { shift++; quote(); } }, '↻'));
@@ -360,9 +361,10 @@ App.reg({
     sections.forEach(([title, items]) => { const sec = h('section', { class: 'home-sec' }, h('h2', null, title)), g = h('div', { class: 'grid g3' }); items.forEach(([id, ic, t, d]) => { const a = h('a', { class: 'card tile', href: '#/' + id }, h('span', { class: 'ic', 'aria-hidden': 'true' }, ic), h('span', null, h('b', null, t), h('small', null, d))); tiles.push([a, norm(t + ' ' + d), sec]); g.append(a); }); sec.append(g); grid.append(sec); });
     const none = h('p', { class: 'muted', hidden: true, role: 'status' }, 'Aucun outil ne correspond. Essaie un autre mot (« lire », « mot », « carte »…).');
     const find = h('input', { type: 'search', id: 'homeFind', placeholder: 'ex. corriger, lire, dictionnaire, carte, voix…', style: 'width:100%;max-width:34rem', 'aria-label': 'Chercher un outil', oninput: ev => { const q = norm(ev.target.value.trim()); let n = 0; tiles.forEach(([a, tx]) => { const ok = !q || tx.includes(q); a.hidden = !ok; if (ok) n++; }); grid.querySelectorAll('.home-sec').forEach(sec => { sec.hidden = ![...sec.querySelectorAll('.tile')].some(a => !a.hidden); }); none.hidden = n > 0; } });
-    el.append(h('div', { class: 'hero' }, h('h2', { style: 'margin:.1rem 0 .3rem' }, hello + ' ! Que veux-tu faire ?'), h('p', { class: 'muted', style: 'margin:.2rem 0 .6rem' }, 'Un espace pour écrire, lire, comprendre et apprendre à ton rythme. Tout fonctionne sur cet appareil : tes textes ne sont envoyés nulle part.'), h('label', { for: 'homeFind', class: 'sr' }, 'Chercher un outil'), find), none, grid,
+    el.append(h('div', { class: 'hero' }, h('h2', { style: 'margin:.1rem 0 .3rem' }, hello + ' ! Que veux-tu faire ?'), h('p', { class: 'muted', style: 'margin:.2rem 0 .6rem' }, 'Un espace pour écrire, lire, comprendre et apprendre à ton rythme. Tout fonctionne sur cet appareil : tes textes ne sont envoyés nulle part.'), h('label', { for: 'homeFind', class: 'sr' }, 'Chercher un outil'), find), (typeof Extras !== 'undefined' ? Extras.homeTop() : ''), none, grid,
       h('div', { class: 'notice ok' }, 'Tout est facultatif. Tu choisis les aides qui te conviennent dans « Mes besoins et préférences ». Aucun diagnostic n’est demandé ni posé.'),
       h('p', { class: 'muted', style: 'margin:.5rem 0 0' }, '💡 Passe la souris (ou la touche Tab) sur un outil ou sur un mot : une bulle explique ce que c’est. Sélectionne un mot puis touche « 📖 Définition » pour un autre mot.'));
+    if (typeof Extras !== 'undefined') { const w = Extras.wodCard(); if (w) el.append(w); }
     const e = App.engines; const badge = (ok, y, n) => h('span', { class: 'badge ' + (ok ? 'ok' : 'warn') }, ok ? y : n);
     const box = h('div', { class: 'card secondary' }, h('h2', { style: 'margin-top:0' }, 'État des moteurs (ce qui fonctionne vraiment ici)'));
     const t = h('table', { class: 't' }, h('tr', null, h('th', null, 'Moteur'), h('th', null, 'État'), h('th', null, 'Détail')));
@@ -392,7 +394,7 @@ App.reg({
     el.append(h('h2', null, 'Adaptations actives'), h('p', { class: 'muted' }, 'Activées par tes cases, ou à ta main. Chaque option se règle librement.'));
     const fl = h('div', { class: 'grid g2' });
     Object.entries(FEATURES).forEach(([k, label]) => fl.append(h('label', { class: 'chk card', style: 'margin:0' }, h('input', { type: 'checkbox', checked: !!P.features[k], onchange: ev => { App.setFeature(k, ev.target.checked); if (k === 'simpleNav') App.buildNav(); if (k === 'focus') document.body.classList.toggle('focus', ev.target.checked); } }), label)));
-    el.append(fl, h('div', { class: 'row', style: 'margin-top:1rem' }, h('a', { class: 'btn sec', href: '#/settings' }, 'Régler la police, les couleurs, l’audio…'), h('a', { class: 'btn sec', href: '#/modes' }, 'Voir mes modes d’apprentissage')));
+    el.append(fl, h('div', { class: 'row', style: 'margin-top:1rem' }, h('a', { class: 'btn sec', href: '#/settings' }, 'Régler la police, les couleurs, l’audio…'), h('a', { class: 'btn sec', href: '#/apprendre' }, 'Voir mes modes d’apprentissage')));
   }
 });
 
@@ -409,7 +411,7 @@ App.reg({
       h('p', { class: 'muted' }, `OpenDyslexic : ${fontOK('OpenDyslexic') ? 'installée ✔' : 'non installée'} · Lexend : ${fontOK('Lexend') ? 'installée ✔' : 'non installée'}. Ces polices ne sont pas fournies avec l’application : installe-les sur l’ordinateur pour les utiliser, sinon une police de secours lisible est employée.`),
       h('label', null, 'Taille du texte (px)'), range('size', 14, 32, 1, ' px'), h('label', null, 'Espacement des lettres (em)'), range('letterSp', 0, 0.2, 0.01, ' em'),
       h('label', null, 'Espacement des mots (em)'), range('wordSp', 0, 0.5, 0.02, ' em'), h('label', null, 'Interligne'), range('lineH', 1.2, 2.4, 0.1, ''), h('label', null, 'Espacement des paragraphes'), range('paraSp', 1, 3, 0.1, ''),
-      h('label', null, 'Thème'), sel('theme', [['auto', 'Automatique'], ['light', 'Clair'], ['dark', 'Sombre']]),
+      h('label', null, 'Thème'), sel('theme', [['auto', 'Automatique'], ['light', 'Clair'], ['sepia', 'Crème (fond papier, repose les yeux)'], ['dark', 'Sombre'], ['contrast', 'Contraste élevé (noir et jaune)']]),
       h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.showIcons, onchange: ev => { p.showIcons = ev.target.checked; App.savePrefs(); } }), 'Afficher une icône à côté de chaque erreur (la couleur ne doit pas être le seul repère)'),
       h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.showCorrect, onchange: ev => { p.showCorrect = ev.target.checked; App.savePrefs(); } }), 'Colorer en bleu les mots corrects'),
       h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.hoverDef !== false, onchange: ev => { p.hoverDef = ev.target.checked; App.savePrefs(); } }), 'Définitions au survol : passer la souris sur un outil ou sur un mot explique ce que c’est (aucun mot n’est envoyé sur internet sans ton accord)'),
@@ -425,6 +427,7 @@ App.reg({
       h('label', null, 'Niveau de simplification par défaut'), sel('simplLevel', [['tres', 'Très simple'], ['simple', 'Simple'], ['courant', 'Langage courant']]), h('label', null, 'Niveau d’explication'), sel('explainLevel', [['court', 'Court'], ['detail', 'Détaillé']]),
       h('label', null, 'Durée du minuteur (minutes)'), range('timerMin', 5, 60, 5, ' min'),
       h('div', { class: 'row', style: 'margin-top:.6rem' }, h('button', { class: 'btn sec', onclick: () => App.speak('Bonjour, voici un exemple de lecture à voix haute.') }, '🔊 Tester la voix'))));
+    if (typeof Extras !== 'undefined') Extras.settingsCards(el);
     el.append(h('div', { class: 'card' }, h('h2', { style: 'margin-top:0' }, 'Confidentialité'),
       h('p', null, 'Tes textes, documents et résultats restent sur cet ordinateur (dans le stockage du navigateur). Le serveur local n’écoute que cet ordinateur (127.0.0.1) et n’envoie rien sur Internet.'),
       h('p', null, 'Exception à connaître : la dictée vocale du navigateur (Chrome/Edge) peut envoyer l’audio à un service en ligne.'),

@@ -1,12 +1,13 @@
 {
   "name": "outil-dys",
   "version": "2.0.0",
-  "description": "",
+  "description": "Outil Dys V2 : outil d’accessibilité et d’apprentissage, local et privé (sans dépendance).",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "UNLICENSED",
+  "private": true
 }

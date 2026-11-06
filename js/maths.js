@@ -80,7 +80,7 @@ if (typeof App !== 'undefined') {
   const tabCalc = b => {
     const a = h('input', { type: 'text', inputmode: 'numeric', value: '347', 'aria-label': 'Premier nombre' }), c = h('input', { type: 'text', inputmode: 'numeric', value: '86', 'aria-label': 'Deuxième nombre' });
     const op = h('select', { 'aria-label': 'Opération' }, [['add', '+  addition'], ['sub', '−  soustraction'], ['mul', '×  multiplication'], ['div', '÷  division euclidienne']].map(([v, l]) => h('option', { value: v }, l)));
-    const out = h('div', { 'aria-live': 'polite' }); let shown = 0, R = null; const reveal = h('div'); const pre = h('pre', { style: 'font-size:1.25em;line-height:1.35;background:var(--card,#fff);border:1px solid #999;padding:.6rem;border-radius:8px;overflow:auto;display:inline-block;min-width:8ch' });
+    const out = h('div', { 'aria-live': 'polite' }); let shown = 0, R = null; const reveal = h('div'); const pre = h('pre', { style: 'font-size:1.25em;line-height:1.35;background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:.6rem;border-radius:8px;overflow:auto;display:inline-block;min-width:8ch' });
     const stepsBox = h('ol');
     const drawSteps = () => { stepsBox.replaceChildren(...R.steps.slice(0, shown).map((s, i) => h('li', { style: i === shown - 1 ? 'font-weight:700' : '' }, s))); nxt.disabled = shown >= R.steps.length; resBox.hidden = shown < R.steps.length; };
     const nxt = h('button', { class: 'btn', onclick: () => { shown = Math.min(R.steps.length, shown + 1); drawSteps(); } }, 'Étape suivante'); const all = h('button', { class: 'btn sec', onclick: () => { shown = R.steps.length; drawSteps(); } }, 'Tout afficher');

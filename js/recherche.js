@@ -49,9 +49,13 @@ const Recherche = (() => {
       status.textContent = (mods.length + words.length) + ' résultat(s) dans l’outil.';
     };
     input.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 140); });
-    input.addEventListener('focus', () => { if (input.value.trim()) run(); });
+    // champ vide : favoris et pages récentes (un clic pour y retourner)
+    const quick = () => { if (typeof Extras === 'undefined') return; const fv = Extras.favs(), rc = Extras.recent().filter(id => !fv.includes(id)).slice(0, 5); if (!fv.length && !rc.length) return; const mk = (t, ids) => ids.length ? [h('h3', { class: 'gs-h' }, t), h('ul', { class: 'gs-l' }, ids.map(id => { const m = App.mods.find(x => x.id === id); return h('li', null, h('a', { href: '#/' + id, onclick: () => close() }, (m.icon || '▫️') + ' ' + m.title)); }))] : [];
+      res.replaceChildren(h('div', null, ...mk('⭐ Mes favoris', fv), ...mk('🕘 Récemment ouverts', rc))); res.hidden = false; };
+    input.addEventListener('focus', () => { if (input.value.trim()) run(); else quick(); });
+    input.addEventListener('input', () => { if (!input.value.trim()) { clearTimeout(timer); quick(); if (res.hidden) status.textContent = ''; } });
     form.addEventListener('keydown', ev => {
-      if (ev.key === 'Escape') { if (!res.hidden) { close(); ev.stopPropagation(); } else input.blur(); return; }
+      if (ev.key === 'Escape') { if (!res.hidden) { close(); ev.preventDefault(); ev.stopPropagation(); } else input.blur(); return; } // preventDefault : sinon le navigateur vide aussi le champ de recherche
       if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { const els = [input, ...res.querySelectorAll('a,button')], i = els.indexOf(document.activeElement); const n = els[Math.max(0, Math.min(els.length - 1, i + (ev.key === 'ArrowDown' ? 1 : -1)))]; if (n) { n.focus(); ev.preventDefault(); } }
     });
     document.addEventListener('click', ev => { const path = ev.composedPath ? ev.composedPath() : []; if (!path.includes(form) && !form.contains(ev.target)) close(); }); // composedPath : le bouton cliqué a pu être retiré de la page avant ce test

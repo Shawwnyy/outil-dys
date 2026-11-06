@@ -178,3 +178,26 @@ Le nombre de lunes évolue avec les découvertes : vérifie une source récente.
 - **Sur téléphone / tablette** (pas de survol) : sélectionne un mot puis touche **📖 Définition** (à côté de « 🔊 Lire »). Le mot s'ouvre dans la recherche de l'en-tête ; l'envoi au Wiktionnaire ne se fait qu'au clic.
 - Se désactive dans Réglages (« Définitions au survol »). Les champs de saisie, les zones de texte et les graphiques ne déclenchent pas de bulle.
 - **Astronomie / NASA** : plus aucun menu, tuile ni texte n'y renvoie. Il ne reste que **Repérage dans l’espace**. L'ancienne adresse `#/espace` renvoie vers lui ; le code du module reste dans `js/espace.js` (caché) mais n'apparaît nulle part.
+
+## Mise à jour V2.1 : corrections et nouvelles fonctions
+
+**Corrections**
+- Lien cassé de « Mes besoins et préférences » (« Voir mes modes d’apprentissage ») : il renvoie maintenant vers « Apprendre autrement ».
+- Thème sombre : textes illisibles corrigés (boutons rouges « Effacer / Remettre à zéro », cartes cliquables de « Apprendre autrement », addition posée de « Mathématiques »).
+- Cases à cocher, curseurs, champs de date et boutons « Choisir un fichier » agrandis (cibles tactiles de 24 px minimum).
+- Correcteur : plus de faux avertissement sur « avec nous », « chez vous », « sur elle » ; nouvelles erreurs repérées : « tu à » → « tu as », « je vais a la plage » → « à la », « c est / j ai / l école » sans apostrophe.
+- Citation du bandeau : les guillemets « » restent collés au texte (espaces insécables).
+- Recherche de l'en-tête : Échap ferme la liste sans vider le champ.
+- Nettoyage : fichiers de test (`undefined/`, `lens-idf.png`) retirés du dépôt ; `package.json` complété (`npm start`).
+
+**Nouvelles fonctions** (toutes locales ; rien ne part sur internet)
+- ⭐ **Favoris** : bouton « ☆ Favori » à côté du titre de chaque page ; l'accueil montre « Reprendre », « Mes favoris » et « Récemment ouverts ». Le champ de recherche vide les propose aussi.
+- 📖 **Mot du jour** (bas de l'accueil) : un mot nouveau du Petit Larousse / Petit Robert 2027 avec sa source, choisi d'après la date.
+- 💾 **Sauvegarde et restauration** (Paramètres) : télécharge un fichier `.json` avec toutes tes données, et restaure-le (le fichier est vérifié : seules les clés `dys.*` valides sont acceptées ; confirmation avant de remplacer).
+- 📴 **Mode hors ligne** : `sw.js` garde les fichiers de l'outil dans le navigateur (réseau d'abord : tu as toujours la dernière version quand internet est là). Disponible avec `node server.js` ou la version en ligne, pas en ouvrant `index.html` directement.
+- 🎨 **Deux nouveaux thèmes** : « Crème » (fond papier) et « Contraste élevé » (noir et jaune).
+- 🧘 **Réduire les animations** (Paramètres), et respect du réglage « réduire les animations » du système.
+- ⌨️ **Aide des raccourcis** : touche `?` (ou bouton dans Paramètres).
+- ⏸ **Pause / Reprendre** dans « Lecture audio ».
+- 🖨️ **Impression** : Ctrl+P masque le menu et les boutons, texte noir sur blanc, adresses des liens affichées.
+- ℹ️ **À propos** (Paramètres) : version, limites honnêtes, lien du code.
