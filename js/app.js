@@ -35,7 +35,7 @@ const PROFILES = [
 ];
 const FEATURES = {
   fontDys: 'Police adaptée (lisible)', spacing: 'Espacement des lettres et des mots', airy: 'Textes aérés (interligne et paragraphes)', ruler: 'Règle de lecture', syllables: 'Surlignage syllabique (approximatif) dans la lecture',
-  audio: 'Boutons « écouter » mis en avant', detailCorr: 'Correction détaillée : explication de chaque erreur ouverte', bigTargets: 'Grandes zones cliquables', simpleNav: 'Navigation simplifiée (menu replié)', shortcuts: 'Raccourcis clavier (Alt+1…9, Alt+A, Alt+L, Alt+C)',
+  audio: 'Boutons « écouter » mis en avant', detailCorr: 'Correction détaillée : explication de chaque erreur ouverte', bigTargets: 'Grandes zones cliquables', simpleNav: 'Navigation simplifiée (menu replié)', shortcuts: 'Raccourcis clavier (Alt+1…9, Alt+A, Alt+L, Alt+C ; Alt+R lit le texte sélectionné et Échap arrête la lecture, sans réglage)',
   voiceInput: 'Saisie vocale mise en avant', focus: 'Mode concentration au démarrage', timer: 'Minuteur visible', shortText: 'Consignes courtes', calmVisual: 'Interface calme (pas d’animations)', deeper: 'Défis et approfondissement mis en avant', mathVisual: 'Aides visuelles pour les nombres ouvertes par défaut'
 };
 const SUGGEST = {
@@ -133,9 +133,12 @@ const App = {
     window.addEventListener('hashchange', () => { if (location.hash === '' || location.hash.startsWith('#/')) this.route(); });
     $('#menuBtn').addEventListener('click', () => { const hide = document.body.classList.toggle('nav-hidden'); $('#menuBtn').setAttribute('aria-expanded', String(!hide)); });
     $('#focusBtn').addEventListener('click', () => this.toggleFocus());
+    const bump = d => { const n = Math.max(14, Math.min(32, (+this.prefs.size || 18) + d)); this.prefs.size = n; this.savePrefs(); this.toast('Taille du texte : ' + n + ' px' + (n === 14 || n === 32 ? ' (limite)' : '')); };
+    $('#aMinus').addEventListener('click', () => bump(-2)); $('#aPlus').addEventListener('click', () => bump(2)); this.initReadSel();
     if (this.feat('focus')) document.body.classList.add('focus');
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') this.hidePop();
+      if (e.key === 'Escape') { this.hidePop(); this.stopSpeak(); }
+      if (e.altKey && e.key.toLowerCase() === 'r') { e.preventDefault(); this.readSelection(); return; }
       if (!e.altKey || !this.feat('shortcuts')) { if (e.altKey && e.key.toLowerCase() === 'c') this.toggleFocus(); return; }
       const k = e.key.toLowerCase(); const order = ['home', 'correcteur', 'dictee', 'lecture', 'simplif', 'slides', 'analyse', 'maths', 'exercices'];
       if (/^[1-9]$/.test(k)) { this.go(order[+k - 1] || 'home'); e.preventDefault(); }
@@ -146,6 +149,14 @@ const App = {
     document.addEventListener('click', e => { const p = $('#pop'); if (!p.hidden && !p.contains(e.target) && !e.target.closest('.seg,[data-pop]')) this.hidePop(); });
     setInterval(() => { if (document.hidden) return; this.stats.timeSec.app++; if (this.learning) this.stats.timeSec.learn++; if (this.stats.timeSec.app % 15 === 0) this.saveStats(); this.timerTick(); }, 1000);
     this.detectEngines(); this.route();
+  },
+  // 🔊 lire la sélection : sélectionne du texte n'importe où (page, zone de texte), un bouton « Lire » apparaît ; Alt+R fait la même chose ; Échap arrête
+  selectedText() { const a = document.activeElement; if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName) && typeof a.selectionStart === 'number' && a.selectionStart !== a.selectionEnd) return a.value.slice(a.selectionStart, a.selectionEnd).trim(); const s = window.getSelection(); return s && !s.isCollapsed ? s.toString().trim() : ''; },
+  readSelection() { const t = this.selectedText(); if (!t) return this.toast('Sélectionne d’abord du texte, puis touche « 🔊 Lire » (ou Alt+R). Échap arrête la lecture.'); if (!('speechSynthesis' in window)) return this.toast('La lecture à voix haute n’est pas disponible dans ce navigateur.'); this.stopSpeak(); this.speak(t.slice(0, 4000)); },
+  initReadSel() {
+    const b = h('button', { id: 'readSel', class: 'btn', type: 'button', 'aria-label': 'Lire à voix haute le texte sélectionné', style: 'position:fixed;display:none;z-index:60;min-height:0;padding:.3rem .7rem;box-shadow:0 2px 10px rgba(0,0,0,.4)', onmousedown: e => e.preventDefault(), onclick: () => { this.readSelection(); b.style.display = 'none'; } }, '🔊 Lire'); document.body.append(b);
+    let t = 0; const upd = () => { const txt = this.selectedText(); if (txt.length < 2 || !('speechSynthesis' in window)) { b.style.display = 'none'; return; } const a = document.activeElement; let r; if (a && /^(TEXTAREA|INPUT)$/.test(a.tagName) && a.selectionStart !== a.selectionEnd) r = a.getBoundingClientRect(); else { const s = getSelection(); if (!s.rangeCount) return; r = s.getRangeAt(0).getBoundingClientRect(); if (!r.width && !r.height) { b.style.display = 'none'; return; } } b.style.display = 'block'; b.style.left = Math.max(8, Math.min(innerWidth - 90, r.left)) + 'px'; b.style.top = Math.max(8, Math.min(innerHeight - 44, r.bottom + 8)) + 'px'; };
+    const later = () => { clearTimeout(t); t = setTimeout(upd, 250); }; document.addEventListener('selectionchange', later); document.addEventListener('mouseup', later); document.addEventListener('keyup', later); document.addEventListener('scroll', () => { b.style.display = 'none'; }, true);
   },
   toggleFocus() { const on = document.body.classList.toggle('focus'); this.toast(on ? 'Mode concentration activé : menu masqué.' : 'Mode concentration désactivé.'); },
   async detectEngines() {
