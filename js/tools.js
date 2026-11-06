@@ -133,7 +133,7 @@ App.reg({
     el.append(ta, h('div', { class: 'row', style: 'margin:.5rem 0' }, h('button', { class: 'btn', 'data-act': 'listen', onclick: play }, '▶ Lire'), h('button', { class: 'btn sec', onclick: () => { App.stopSpeak(); draw(null); } }, '⏹ Arrêter'),
       h('button', { class: 'btn sec', 'aria-pressed': String(mode === 'syl'), onclick: ev => { mode = mode === 'syl' ? 'plain' : 'syl'; ev.target.setAttribute('aria-pressed', String(mode === 'syl')); ev.target.textContent = mode === 'syl' ? '✓ Syllabes affichées' : 'Afficher les syllabes'; draw(null); } }, mode === 'syl' ? '✓ Syllabes affichées' : 'Afficher les syllabes'),
       h('label', { class: 'chk' }, 'Vitesse ', h('input', { type: 'range', min: 0.5, max: 1.6, step: 0.1, value: App.prefs.ttsRate, 'aria-label': 'Vitesse de lecture', onchange: ev => { App.prefs.ttsRate = +ev.target.value; App.savePrefs(); } }))),
-      h('label', null, 'Importer un fichier à lire'), fileInput('.txt,.md,.docx,.odt,.pdf,.pptx', async f => { const r = await App.readFile(f); ta.value = r.text; App.setText(r.text, f.name.replace(/\.[^.]+$/, ''), r.kind); draw(null); }), view);
+      h('label', null, 'Importer un fichier à lire'), fileInput('.txt,.md,.docx,.odt,.pdf,.pptx', async f => { const r = await App.readFile(f); ta.value = r.text; App.setText(r.text, f.name.replace(/\.[^.]+$/, ''), r.kind); draw(null); }), view, App.voicePanel());
     draw(null);
   }
 });

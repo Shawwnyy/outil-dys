@@ -91,3 +91,32 @@ table.t{border-collapse:collapse;width:100%}table.t th,table.t td{border:1px sol
 .badge{white-space:nowrap}
 
 .scell{border:2px solid var(--line);background:var(--panel);color:inherit;border-radius:8px;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}.scell:hover,.scell.on{border-color:var(--accent);background:rgba(37,99,235,.12)}.scell.ok{background:#bbf7d0;color:#111}.scell.hint{background:#fef08a;color:#111}
+
+/* bandeau du haut : date, heure à la seconde, citation */
+#top{flex-wrap:wrap}
+#infobar{flex:1 0 100%;min-width:0;overflow-wrap:anywhere;order:20;display:flex;flex-wrap:wrap;align-items:center;gap:.2rem .9rem;border-top:1px solid var(--line);padding-top:.35rem;margin-top:.1rem;font-size:.9rem}
+#infobar[hidden]{display:none}
+.ib-when{min-width:0;overflow-wrap:anywhere}
+.ib-time{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);display:inline-block;min-width:5.4em}
+.ib-quote{flex:1 1 18rem;font-style:italic;min-width:0}
+.ib-src{font-style:normal;color:var(--muted);font-size:.85em}
+.ib-next{min-height:0;padding:.05rem .6rem}
+body.focus #infobar{display:none}
+@media (max-width:600px){#top{position:static}#infobar{font-size:.85rem}}
+.sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+/* accueil */
+.hero{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:.9rem 1.2rem 1.1rem;margin:.5rem 0 1rem}
+.tile{display:flex;gap:.8rem;align-items:flex-start;text-decoration:none;color:inherit;margin:0;transition:border-color .15s,transform .15s}
+.tile[hidden],.home-sec[hidden]{display:none}
+.tile .ic{font-size:1.9rem;line-height:1.1;flex:none}
+.tile b{display:block}.tile small{display:block;color:var(--muted);font-size:.88rem;line-height:1.4;margin-top:.15rem}
+.tile:hover{border-color:var(--accent);transform:translateY(-1px)}.tile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.home-sec h2{margin:1.1rem 0 .5rem}
+/* dictionnaire */
+.dico-res{margin:.6rem 0}.dico-res h3{margin:.8rem 0 .2rem}.dico-res ol{margin:.2rem 0 .6rem 1.2rem;padding:0}.dico-res li{margin:.25rem 0}
+.sugg-list{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.wordbig{font-size:1.7rem;font-weight:700;margin:.2rem 0}
+.syl-big span{display:inline-block;padding:0 .12em;border-radius:6px}.syl-big span:nth-child(odd){background:var(--soft)}
+.badge-src{display:inline-block;font-size:.78rem;padding:.05rem .45rem;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+#homeFind,#dicoQ{font:inherit;padding:.5rem .8rem;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);min-height:var(--tap)}
+#homeFind:focus-visible,#dicoQ:focus-visible{outline:3px solid var(--accent);outline-offset:2px}

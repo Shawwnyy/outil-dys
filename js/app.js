@@ -28,7 +28,7 @@ const FONTS = {
   opendys: ['OpenDyslexic (si installée)', 'OpenDyslexic,"Open Dyslexic",Verdana,Arial,sans-serif'], lexend: ['Lexend (si installée)', 'Lexend,Verdana,Arial,sans-serif'],
   georgia: ['Georgia', 'Georgia,serif'], mono: ['Chasse fixe', '"Courier New",monospace']
 };
-const DEFAULT_PREFS = { colors: {}, font: 'system', size: 18, letterSp: 0, wordSp: 0, paraSp: 1, lineH: 1.6, theme: 'auto', ttsRate: 1, voice: '', lang: 'fr', simplLevel: 'simple', explainLevel: 'court', showCorrect: true, showIcons: true, minSlideFont: 18, autoAnalyse: true, softTypo: true, timerMin: 25 };
+const DEFAULT_PREFS = { colors: {}, font: 'system', size: 18, letterSp: 0, wordSp: 0, paraSp: 1, lineH: 1.6, theme: 'auto', ttsRate: 1, voice: '', lang: 'fr', simplLevel: 'simple', explainLevel: 'court', showCorrect: true, showIcons: true, minSlideFont: 18, autoAnalyse: true, softTypo: true, timerMin: 25, showBar: true };
 const PROFILES = [
   { g: 'Troubles spécifiques des apprentissages', items: [['dyslexie', 'Dyslexie'], ['dysortho', 'Dysorthographie'], ['dysgraphie', 'Dysgraphie'], ['dyscalculie', 'Dyscalculie'], ['dyspraxie', 'Dyspraxie / trouble développemental de la coordination'], ['dysphasie', 'Dysphasie / trouble développemental du langage'], ['associes', 'Troubles associés']] },
   { g: 'Autres profils et besoins', items: [['tdah', 'TDAH'], ['hpi', 'HPI'], ['concentration', 'Difficultés de concentration'], ['memo', 'Difficultés de mémorisation'], ['lecture', 'Difficultés de lecture'], ['ecriture', "Difficultés d'écriture"], ['compre', 'Difficultés de compréhension'], ['organisation', "Difficultés d'organisation"], ['spatial', 'Difficultés de repérage spatial'], ['visuel', 'Sensibilité aux stimulations visuelles'], ['simplifie', 'Besoin de supports simplifiés'], ['consignes', 'Besoin de consignes courtes'], ['repetitions', 'Besoin de répétitions'], ['audio', "Besoin d'accompagnement audio"]] }
@@ -79,6 +79,7 @@ const App = {
     document.body.classList.toggle('big', this.feat('bigTargets'));
     document.body.classList.toggle('calm', this.feat('calmVisual'));
     const ruler = $('#ruler'); if (ruler) ruler.hidden = !this.feat('ruler');
+    const ib = $('#infobar'); if (ib) ib.hidden = p.showBar === false;
     const tb = $('#timerBox'); if (tb) tb.hidden = !this.feat('timer') && !this.timerOn;
     if (this.feat('timer') && !this.timerOn) this.timerStart(true);
   },
@@ -134,7 +135,7 @@ const App = {
     $('#menuBtn').addEventListener('click', () => { const hide = document.body.classList.toggle('nav-hidden'); $('#menuBtn').setAttribute('aria-expanded', String(!hide)); });
     $('#focusBtn').addEventListener('click', () => this.toggleFocus());
     const bump = d => { const n = Math.max(14, Math.min(32, (+this.prefs.size || 18) + d)); this.prefs.size = n; this.savePrefs(); this.toast('Taille du texte : ' + n + ' px' + (n === 14 || n === 32 ? ' (limite)' : '')); };
-    $('#aMinus').addEventListener('click', () => bump(-2)); $('#aPlus').addEventListener('click', () => bump(2)); this.initReadSel();
+    $('#aMinus').addEventListener('click', () => bump(-2)); $('#aPlus').addEventListener('click', () => bump(2)); this.initReadSel(); this.initBar();
     if (this.feat('focus')) document.body.classList.add('focus');
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { this.hidePop(); this.stopSpeak(); }
@@ -249,11 +250,45 @@ const App = {
   },
 
   // ---------------------------------------------------------------- voix
-  voices() { return ('speechSynthesis' in window) ? speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang)) : []; },
+  voices(all) { if (!('speechSynthesis' in window)) return []; const v = speechSynthesis.getVoices(); return all ? v : v.filter(x => /^fr/i.test(x.lang)); },
+  // voix choisie dans « Lecture audio » ou « Paramètres » ; sinon une voix française installée sur l'appareil (plutôt qu'une voix en ligne)
+  pickVoice() { const all = this.voices(true), fr = all.filter(x => /^fr/i.test(x.lang)); return all.find(x => x.name === this.prefs.voice) || fr.find(x => x.localService) || fr[0] || null; },
+  // panneau « Choisir la voix » : toutes les voix que le navigateur propose (sous Windows : celles installées dans Windows, et sous Edge les voix « Natural » en ligne)
+  voicePanel() {
+    const SAMPLE = 'Bonjour ! Voici ma voix. Je peux lire tes textes à voix haute, doucement ou plus vite.', ui = Object.assign({ other: false, online: false }, Store.get('voice.ui', {}));
+    const box = h('div', { class: 'card' }), list = h('div'); const langName = c => { try { return new Intl.DisplayNames(['fr'], { type: 'language' }).of(c.replace('_', '-')); } catch (e) { return c; } };
+    const preview = v => { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(SAMPLE); u.voice = v; u.lang = v.lang; u.rate = this.prefs.ttsRate; speechSynthesis.speak(u); };
+    const draw = () => {
+      const all = this.voices(true); const rank = v => { const i = ['fr-FR', 'fr-BE', 'fr-CA', 'fr-CH'].indexOf(v.lang.replace('_', '-')); return /^fr/i.test(v.lang) ? (i < 0 ? 4 : i) : 9; };
+      const shown = all.filter(v => (ui.other || /^fr/i.test(v.lang)) && (ui.online || v.localService)).sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name, 'fr'));
+      const hidden = all.filter(v => (ui.other || /^fr/i.test(v.lang)) && !ui.online && !v.localService).length, cur = this.pickVoice();
+      list.replaceChildren(
+        !('speechSynthesis' in window) ? h('div', { class: 'notice bad' }, 'La lecture à voix haute n’est pas disponible dans ce navigateur.') : '',
+        h('p', { class: 'muted', role: 'status' }, shown.length ? `${shown.length} voix affichée${shown.length > 1 ? 's' : ''}${hidden ? ` · ${hidden} voix en ligne masquée${hidden > 1 ? 's' : ''}` : ''}. Voix utilisée : ` : 'Aucune voix à afficher pour l’instant. ', shown.length ? h('b', null, cur ? cur.name : 'celle du navigateur') : ''),
+        ...shown.map(v => { const on = cur && cur.name === v.name; return h('div', { class: 'row', style: 'padding:.4rem 0;border-bottom:1px solid var(--line)' }, h('div', { style: 'flex:1;min-width:12rem' }, h('b', null, v.name), h('div', { class: 'muted' }, langName(v.lang) + ' · ' + (v.localService ? '🔒 sur cet appareil' : '☁️ en ligne : le texte est envoyé au fournisseur de la voix'))),
+          h('button', { class: 'btn sec', onclick: () => preview(v), 'aria-label': 'Écouter la voix ' + v.name }, '▶ Écouter'), h('button', { class: 'btn' + (on ? '' : ' sec'), 'aria-pressed': String(!!on), 'aria-label': 'Utiliser la voix ' + v.name, onclick: () => { this.prefs.voice = v.name; this.savePrefs(); draw(); this.toast('Voix choisie : ' + v.name); } }, on ? '✓ Voix choisie' : 'Choisir')); }));
+    };
+    const ck = (t, key) => h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: ui[key], onchange: ev => { ui[key] = ev.target.checked; Store.set('voice.ui', ui); draw(); } }), t);
+    box.append(h('h2', { style: 'margin-top:0' }, '🎙️ Choisir la voix'), h('p', { class: 'muted' }, 'Ces voix viennent de ton navigateur et de ton système : je ne peux pas savoir à l’avance lesquelles tu as. Écoute-les et choisis celle qui te convient.'), h('div', { class: 'row' }, ck('Voix d’autres langues', 'other'), ck('Voix en ligne (le texte quitte l’ordinateur)', 'online')), list,
+      h('details', null, h('summary', null, 'Ajouter d’autres voix sous Windows'), h('p', { class: 'muted' }, 'Dans Windows : Paramètres → Heure et langue → Voix (ou Parole) → Ajouter des voix, et choisis le français. Les noms exacts des menus changent selon la version de Windows. Redémarre ensuite le navigateur pour qu’il les voie. Dans Microsoft Edge, des voix « Natural » en ligne peuvent aussi apparaître : elles sont masquées par défaut parce que le texte est alors envoyé à Microsoft pour être lu.')));
+    draw(); if ('speechSynthesis' in window) { speechSynthesis.addEventListener('voiceschanged', () => { if (box.isConnected) draw(); }); setTimeout(() => { if (box.isConnected) draw(); }, 600); } return box;
+  },
+  // bandeau du haut : date, heure à la seconde, citation du jour (proverbes, voir js/citations.js)
+  initBar() {
+    const bar = $('#infobar'); if (!bar || typeof CITATIONS === 'undefined') return;
+    const fd = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), ft = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const dateEl = h('span', { class: 'ib-date' }), timeEl = h('time', { class: 'ib-time', role: 'timer', 'aria-label': 'Heure' }), q = h('span', { class: 'ib-quote' });
+    const day = () => { const d = new Date(); return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000); }; let shift = 0;
+    const quote = () => { const [t, a] = CITATIONS[(day() + shift) % CITATIONS.length]; q.replaceChildren('« ' + t + ' »', h('span', { class: 'ib-src' }, ' — ' + a)); };
+    const tick = () => { const d = new Date(), ds = fd.format(d); const dd = ds.charAt(0).toUpperCase() + ds.slice(1); if (dateEl.textContent !== dd) { dateEl.textContent = dd; quote(); } timeEl.textContent = ft.format(d); };
+    const loop = () => { tick(); setTimeout(loop, 1000 - (Date.now() % 1000) + 8); };
+    bar.replaceChildren(h('span', { class: 'ib-when' }, h('span', { 'aria-hidden': 'true' }, '📅 '), dateEl, h('span', { class: 'ib-sep', 'aria-hidden': 'true' }, ' · '), h('span', { 'aria-hidden': 'true' }, '🕘 '), timeEl), q, h('button', { class: 'btn ghost ib-next', title: 'Voir une autre citation', 'aria-label': 'Voir une autre citation', onclick: () => { shift++; quote(); } }, '↻'));
+    loop(); document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+  },
   speak(text, o = {}) {
     if (!('speechSynthesis' in window)) { this.toast("La lecture à voix haute n'est pas disponible dans ce navigateur."); return null; }
     speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'fr-FR'; u.rate = o.rate || this.prefs.ttsRate;
-    const v = this.voices(); const pick = v.find(x => x.name === this.prefs.voice) || v[0]; if (pick) u.voice = pick;
+    const pick = this.pickVoice(); if (pick) { u.voice = pick; u.lang = pick.lang || 'fr-FR'; }
     if (o.onBoundary) u.onboundary = o.onBoundary; u.onend = u.onerror = () => { o.onEnd && o.onEnd(); }; speechSynthesis.speak(u); return u;
   },
   stopSpeak() { if ('speechSynthesis' in window) speechSynthesis.cancel(); },
@@ -304,12 +339,22 @@ App.reg({ id: 'placeholder', title: '', group: 'none', hidden: true, render() { 
 // Accueil
 App.reg({
   id: 'home', title: 'Accueil', group: 'home', render(el) {
-    el.append(h('h1', null, 'Bienvenue dans Outil Dys'),
-      h('p', null, 'Un espace pour écrire, lire, comprendre et apprendre à ton rythme. Tout fonctionne sur cet ordinateur : tes textes ne sont envoyés nulle part.'),
-      h('div', { class: 'notice ok' }, 'Tout est facultatif. Tu choisis les aides qui te conviennent dans « Mes besoins et préférences ». Aucun diagnostic n’est demandé ni posé.'));
+    const hr = new Date().getHours(), hello = hr < 5 || hr >= 18 ? 'Bonsoir' : 'Bonjour';
+    el.append(h('h1', null, 'Bienvenue dans Outil Dys'));
     const nDue = typeof Rev !== 'undefined' ? Rev.dueList().length : 0;
-    const cards = [['revision', '🔁 Réviser mes dictées', nDue ? `${nDue} mot${nDue > 1 ? 's' : ''} à réviser maintenant.` : 'Garde les mots ratés en dictée et révise-les en courtes séances.'], ['sante', '🩺 Trouver un professionnel de santé', 'Carte de France par région, recherche par nom ou téléphone, carnet de contacts privé.'], ['correcteur', '✍️ Corriger un texte', 'Les fautes sont colorées selon 15 catégories, avec explications.'], ['slides', '📊 Analyser un PowerPoint', 'Fautes, lisibilité, contrastes, mise en page — et export corrigé.'], ['lecture', '🔊 Écouter un texte', 'Lecture à voix haute, syllabes, règle de lecture.'], ['simplif', '🧩 Simplifier', 'Phrases plus courtes, mots expliqués, liste, tableau.'], ['analyse', '📚 Comprendre mon cours', 'Importe un cours : passages difficiles, définitions, version simple.'], ['fiches', '🗂️ Fiches, cartes mentales, quiz', 'À partir de n’importe quel document.'], ['profil', '🧭 Mes besoins et préférences', 'Police, espacements, règle, concentration…'], ['maths', '🔢 Mathématiques visuelles', 'Calculs étape par étape, droite numérique, fractions.'], ['espace', '🪐 Astronomie et espace', 'Système solaire animé, fiches des planètes (données NASA datées).'], ['matieres', '📚 Mes matières', 'Géographie, histoire, langues, sciences, informatique…'], ['defis', '🧩 Défis (facultatif)', 'Suites logiques, nombres premiers, estimations.']];
-    el.append(h('div', { class: 'grid g3' }, cards.map(([id, t, d]) => h('a', { class: 'card', href: '#/' + id, style: 'text-decoration:none;color:inherit' }, h('h3', { style: 'margin-top:0' }, t), h('p', { class: 'muted' }, d)))));
+    const sections = [
+      ['✍️ Écrire, lire, réviser', [['correcteur', '✍️', 'Corriger un texte', 'Les fautes sont colorées selon 15 catégories, avec explications.'], ['revision', '🔁', 'Réviser mes dictées', nDue ? `${nDue} mot${nDue > 1 ? 's' : ''} à réviser maintenant.` : 'Garde les mots ratés en dictée et révise-les en courtes séances.'], ['lecture', '🔊', 'Écouter un texte', 'Lecture à voix haute avec la voix de ton choix, syllabes, règle de lecture.'], ['dico', '📖', 'Dictionnaire', 'Chercher un mot, mots nouveaux 2026-2027, mots qui se ressemblent.'], ['dictee', '🎤', 'Dictée vocale', 'Dicte ton texte ou compare ta dictée à un modèle.']]],
+      ['🧭 Me repérer', [['mode-spatial', '🧭', 'Repérage dans l’espace', 'Gauche et droite, trajets pas à pas, quadrillage, points cardinaux.'], ['maths', '🔢', 'Mathématiques visuelles', 'Calculs étape par étape, droite numérique, fractions.'], ['matieres', '📚', 'Mes matières', 'Géographie, histoire, langues, sciences, informatique…']]],
+      ['📚 Comprendre mes cours', [['analyse', '📚', 'Comprendre mon cours', 'Importe un cours : passages difficiles, définitions, version simple.'], ['simplif', '🧩', 'Simplifier', 'Phrases plus courtes, mots expliqués, liste, tableau.'], ['fiches', '🗂️', 'Fiches, cartes mentales, quiz', 'À partir de n’importe quel document.'], ['slides', '📊', 'Analyser un PowerPoint', 'Fautes, lisibilité, contrastes, mise en page — et export corrigé.']]],
+      ['🌱 Mon espace', [['profil', '🧭', 'Mes besoins et préférences', 'Police, espacements, règle, concentration…'], ['sante', '🩺', 'Trouver un professionnel de santé', 'Carte de France par région, recherche par nom ou téléphone, carnet privé.'], ['defis', '🧩', 'Défis (facultatif)', 'Suites logiques, nombres premiers, estimations.']]]
+    ];
+    const norm = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const tiles = []; const grid = h('div');
+    sections.forEach(([title, items]) => { const sec = h('section', { class: 'home-sec' }, h('h2', null, title)), g = h('div', { class: 'grid g3' }); items.forEach(([id, ic, t, d]) => { const a = h('a', { class: 'card tile', href: '#/' + id }, h('span', { class: 'ic', 'aria-hidden': 'true' }, ic), h('span', null, h('b', null, t), h('small', null, d))); tiles.push([a, norm(t + ' ' + d), sec]); g.append(a); }); sec.append(g); grid.append(sec); });
+    const none = h('p', { class: 'muted', hidden: true, role: 'status' }, 'Aucun outil ne correspond. Essaie un autre mot (« lire », « mot », « carte »…).');
+    const find = h('input', { type: 'search', id: 'homeFind', placeholder: 'ex. corriger, lire, dictionnaire, carte, voix…', style: 'width:100%;max-width:34rem', 'aria-label': 'Chercher un outil', oninput: ev => { const q = norm(ev.target.value.trim()); let n = 0; tiles.forEach(([a, tx]) => { const ok = !q || tx.includes(q); a.hidden = !ok; if (ok) n++; }); grid.querySelectorAll('.home-sec').forEach(sec => { sec.hidden = ![...sec.querySelectorAll('.tile')].some(a => !a.hidden); }); none.hidden = n > 0; } });
+    el.append(h('div', { class: 'hero' }, h('h2', { style: 'margin:.1rem 0 .3rem' }, hello + ' ! Que veux-tu faire ?'), h('p', { class: 'muted', style: 'margin:.2rem 0 .6rem' }, 'Un espace pour écrire, lire, comprendre et apprendre à ton rythme. Tout fonctionne sur cet appareil : tes textes ne sont envoyés nulle part.'), h('label', { for: 'homeFind', class: 'sr' }, 'Chercher un outil'), find), none, grid,
+      h('div', { class: 'notice ok' }, 'Tout est facultatif. Tu choisis les aides qui te conviennent dans « Mes besoins et préférences ». Aucun diagnostic n’est demandé ni posé.'));
     const e = App.engines; const badge = (ok, y, n) => h('span', { class: 'badge ' + (ok ? 'ok' : 'warn') }, ok ? y : n);
     const box = h('div', { class: 'card secondary' }, h('h2', { style: 'margin-top:0' }, 'État des moteurs (ce qui fonctionne vraiment ici)'));
     const t = h('table', { class: 't' }, h('tr', null, h('th', null, 'Moteur'), h('th', null, 'État'), h('th', null, 'Détail')));
@@ -317,7 +362,7 @@ App.reg({
     rows.forEach(([n, ok, d]) => t.append(h('tr', null, h('td', null, n), h('td', null, badge(ok, 'Disponible', 'Indisponible')), h('td', null, d))));
     box.append(t, h('p', { class: 'muted' }, 'Non disponibles : import audio et vidéo (aucun moteur de transcription local), Tesseract.js, Mammoth.js, jsPDF (téléchargement impossible dans l’environnement de construction).'));
     el.append(box);
-    if (!e.server) setTimeout(() => App.detectEngines().then(() => { if (App.current.id === 'home') App.refresh(); }), 600);
+    if (!e.server) setTimeout(() => App.detectEngines().then(() => { const f = $('#homeFind'); if (App.current.id === 'home' && !(f && f.value)) App.refresh(); }), 600);
   }
 });
 
@@ -359,6 +404,7 @@ App.reg({
       h('label', null, 'Thème'), sel('theme', [['auto', 'Automatique'], ['light', 'Clair'], ['dark', 'Sombre']]),
       h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.showIcons, onchange: ev => { p.showIcons = ev.target.checked; App.savePrefs(); } }), 'Afficher une icône à côté de chaque erreur (la couleur ne doit pas être le seul repère)'),
       h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.showCorrect, onchange: ev => { p.showCorrect = ev.target.checked; App.savePrefs(); } }), 'Colorer en bleu les mots corrects'),
+      h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.showBar !== false, onchange: ev => { p.showBar = ev.target.checked; App.savePrefs(); } }), 'Afficher le bandeau du haut (date, heure à la seconde, citation du jour)'),
       h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: p.softTypo, onchange: ev => { p.softTypo = ev.target.checked; App.savePrefs(); } }), 'Signaler l’espace avant « ! ? ; : » (règle de typographie française)')));
     const cg = h('div', { class: 'grid g2' });
     CATS.forEach(c => cg.append(h('div', { class: 'row' }, h('input', { type: 'color', value: App.color(c.id), 'aria-label': 'Couleur ' + c.nom, onchange: ev => { p.colors[c.id] = ev.target.value; App.savePrefs(); } }), h('span', null, `${c.emoji} ${c.icone} `, h('b', null, c.libelle)))));
