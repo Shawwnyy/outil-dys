@@ -94,15 +94,15 @@ table.t{border-collapse:collapse;width:100%}table.t th,table.t td{border:1px sol
 
 /* bandeau du haut : date, heure à la seconde, citation */
 #top{flex-wrap:wrap}
-#infobar{flex:1 0 100%;min-width:0;overflow-wrap:anywhere;order:20;display:flex;flex-wrap:wrap;align-items:center;gap:.2rem .9rem;border-top:1px solid var(--line);padding-top:.35rem;margin-top:.1rem;font-size:.9rem}
+#infobar{flex:1 0 100%;min-width:0;overflow-wrap:anywhere;order:20;display:flex;flex-wrap:wrap;align-items:center;gap:.35rem 1.3rem;border-top:1px solid var(--line);padding-top:.5rem;margin-top:.1rem;font-size:1.25rem;position:relative}
 #infobar[hidden]{display:none}
 .ib-when{min-width:0;overflow-wrap:anywhere}
-.ib-time{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);display:inline-block;min-width:5.4em}
-.ib-quote{flex:1 1 18rem;font-style:italic;min-width:0}
-.ib-src{font-style:normal;color:var(--muted);font-size:.85em}
-.ib-next{min-height:0;padding:.05rem .6rem}
+.ib-time{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);display:inline-block;min-width:5.6em;font-size:1.45em;line-height:1.2}
+.ib-quote{flex:1 1 22rem;font-style:italic;min-width:0;font-size:1.05em;line-height:1.4}
+.ib-src{font-style:normal;color:var(--muted);font-size:.78em}
+.ib-next,.ib-etat{min-height:2.6rem;padding:.2rem .9rem;font-size:.9em}.ib-emo{letter-spacing:.15em}
 body.focus #infobar{display:none}
-@media (max-width:600px){#top{position:static}#infobar{font-size:.85rem}}
+@media (max-width:600px){#top{position:static}#infobar{font-size:1.02rem}.ib-time{font-size:1.35em}}
 .sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 /* accueil */
 .hero{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:.9rem 1.2rem 1.1rem;margin:.5rem 0 1rem}
@@ -120,3 +120,17 @@ body.focus #infobar{display:none}
 .badge-src{display:inline-block;font-size:.78rem;padding:.05rem .45rem;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
 #homeFind,#dicoQ{font:inherit;padding:.5rem .8rem;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);min-height:var(--tap)}
 #homeFind:focus-visible,#dicoQ:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* définitions au survol + « Comment je me sens ? » */
+.defw{border-bottom:2px dotted var(--accent);cursor:help;border-radius:3px}.defw:hover,.defw:focus-visible{background:var(--soft);outline:2px solid var(--accent)}
+#defTip{position:fixed;z-index:300;max-width:min(24rem,92vw);background:var(--ink);color:var(--bg);padding:.55rem .8rem;border-radius:10px;box-shadow:0 6px 22px rgba(0,0,0,.35);font-size:1rem;line-height:1.45;font-style:normal;pointer-events:none}
+#defTip[hidden]{display:none}
+.etat-panel{position:absolute;left:0;right:0;top:100%;z-index:40;margin-top:.4rem;background:var(--panel);color:var(--ink);border:2px solid var(--accent);border-radius:14px;padding:.8rem 1rem;box-shadow:0 10px 30px rgba(0,0,0,.3);max-height:78vh;overflow:auto;font-size:1rem;font-style:normal}
+.etat-panel[hidden]{display:none}
+.etat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.7rem}
+.etat-grp{border:1px solid var(--line);border-radius:10px;margin:0;padding:.4rem .6rem .6rem;min-width:0}.etat-grp legend{font-weight:700;padding:0 .3rem}
+.etat-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.etat-chip{font:inherit;font-size:1rem;min-height:2.6rem;padding:.2rem .8rem;border-radius:999px;border:2px solid var(--line);background:var(--panel);color:inherit;cursor:pointer}
+.etat-chip:hover,.etat-chip:focus-visible{border-color:var(--accent)}.etat-chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
+.etat-def{min-height:1.6em;margin:.6rem 0 .2rem;font-weight:600}.etat-tips p{margin:.25rem 0}.etat-tips{margin-bottom:.4rem}
+.etat-hist{margin:.3rem 0 .6rem;padding-left:1.1rem}

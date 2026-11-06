@@ -279,10 +279,11 @@ const App = {
     const fd = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), ft = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const dateEl = h('span', { class: 'ib-date' }), timeEl = h('time', { class: 'ib-time', role: 'timer', 'aria-label': 'Heure' }), q = h('span', { class: 'ib-quote' });
     const minute = () => Math.floor(Date.now() / 60000), N = CITATIONS.length, step = [7, 11, 13, 5, 3, 1].find(k => { let x = k, y = N; while (y) [x, y] = [y, x % y]; return x === 1; }); let shift = 0, lastMin = -1; // une nouvelle citation chaque minute, dans un ordre mélangé
-    const quote = () => { const [t, a] = CITATIONS[(minute() * step + shift) % N]; q.replaceChildren('« ' + t + ' »', h('span', { class: 'ib-src' }, ' — ' + a)); };
+    const quote = () => { const [t, a] = CITATIONS[(minute() * step + shift) % N]; q.replaceChildren('« ', ...(typeof Bandeau !== 'undefined' ? Bandeau.quoteNodes(t) : [t]), ' »', h('span', { class: 'ib-src' }, ' — ' + a)); };
     const tick = () => { const d = new Date(), ds = fd.format(d); const dd = ds.charAt(0).toUpperCase() + ds.slice(1); if (dateEl.textContent !== dd) dateEl.textContent = dd; const mk = minute(); if (mk !== lastMin) { lastMin = mk; shift = 0; quote(); } timeEl.textContent = ft.format(d); };
     const loop = () => { tick(); setTimeout(loop, 1000 - (Date.now() % 1000) + 8); };
     bar.replaceChildren(h('span', { class: 'ib-when' }, h('span', { 'aria-hidden': 'true' }, '📅 '), dateEl, h('span', { class: 'ib-sep', 'aria-hidden': 'true' }, ' · '), h('span', { 'aria-hidden': 'true' }, '🕘 '), timeEl), q, h('button', { class: 'btn ghost ib-next', title: 'La citation change toute seule chaque minute. Touche pour en voir une autre tout de suite.', 'aria-label': 'Voir une autre citation', onclick: () => { shift++; quote(); } }, '↻'));
+    if (typeof Bandeau !== 'undefined') Bandeau.mount(bar);
     loop(); document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   },
   speak(text, o = {}) {
