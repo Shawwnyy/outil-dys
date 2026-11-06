@@ -89,7 +89,7 @@ const Extras = (() => {
     el.append(aboutCard());
   };
 
-  const VERSION = 'Outil Dys V2.3 — 6 novembre 2026';
+  const VERSION = 'Outil Dys V2.4 — 6 novembre 2026';
   const aboutCard = () => h('div', { class: 'card secondary' }, h('h2', { style: 'margin-top:0' }, 'ℹ️ À propos'), h('p', null, VERSION + '. Outil local et privé : tes textes restent sur cet appareil.'),
     h('ul', null, h('li', null, 'Les aides proposées sont des adaptations, pas des diagnostics : l’outil ne dit jamais si une personne a un trouble.'), h('li', null, 'Le correcteur fonctionne par règles : il rate des fautes et peut se tromper. Relis toujours.'), h('li', null, 'Les données (santé, mots nouveaux…) viennent de sources publiques datées ; elles peuvent être incomplètes ou changer.'), h('li', null, 'Rien ne part sur internet sans ton clic (définitions en ligne, liens externes).')),
     h('p', { class: 'muted' }, 'Code : ', h('a', { href: 'https://github.com/Shawwnyy/outil-dys', target: '_blank', rel: 'noopener noreferrer' }, 'github.com/Shawwnyy/outil-dys'), ' (le lien s’ouvre seulement si tu cliques).'));

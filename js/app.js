@@ -17,7 +17,7 @@ const h = (tag, a, ...kids) => {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const Store = {
   get(k, d) { try { const v = localStorage.getItem('dys.' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem('dys.' + k, JSON.stringify(v)); } catch { /* stockage indisponible */ } },
+  set(k, v) { try { localStorage.setItem('dys.' + k, JSON.stringify(v)); } catch { if (!Store._warned && typeof App !== 'undefined' && App.toast) { Store._warned = true; App.toast('⚠ Le stockage de ce navigateur est plein ou bloqué : tes dernières modifications ne sont pas enregistrées. Va dans Paramètres pour faire une sauvegarde, puis libère de la place.'); } } },
   clear() { try { Object.keys(localStorage).filter(k => k.startsWith('dys.')).forEach(k => localStorage.removeItem(k)); } catch { } }
 };
 
@@ -353,9 +353,10 @@ App.reg({
     const nDue = typeof Rev !== 'undefined' ? Rev.dueList().length : 0;
     const sections = [
       ['✍️ Écrire, lire, réviser', [['correcteur', '✍️', 'Corriger un texte', 'Les fautes sont colorées selon 15 catégories, avec explications.'], ['revision', '🔁', 'Réviser mes dictées', nDue ? `${nDue} mot${nDue > 1 ? 's' : ''} à réviser maintenant.` : 'Garde les mots ratés en dictée et révise-les en courtes séances.'], ['lecture', '🔊', 'Écouter un texte', 'Lecture à voix haute avec la voix de ton choix, syllabes, règle de lecture.'], ['dico', '📖', 'Dictionnaire', 'Chercher un mot, mots nouveaux 2026-2027, mots qui se ressemblent.'], ['dictee', '🎤', 'Dictée vocale', 'Dicte ton texte ou compare ta dictée à un modèle.'], ['dictee-orale', '🎧', 'Dictée orale', 'Un narrateur dicte, tu écris, puis correction détaillée.'], ['dactylo', '⌨️', 'Dactylographie', 'Écrire vite et juste, avec correction et suivi.']]],
+      ['🧠 S’entraîner', [['conjugueur', '🔠', 'Conjugueur', 'Tous les temps d’un verbe, terminaisons en couleur, entraînement.'], ['ortho', '🧠', 'Orthographe : s’entraîner', 'Homophones (a/à, et/est…) et ordre alphabétique, avec l’astuce.'], ['calcmental', '🧮', 'Calcul mental, heure, monnaie', 'Calculs rapides, lire l’heure sur l’horloge, rendre la monnaie.'], ['memo', '🃏', 'Cartes mémoire', 'Tes propres cartes, révisées au bon moment (boîtes de Leitner).']]],
       ['🧭 Me repérer', [['mode-spatial', '🧭', 'Repérage dans l’espace', 'Mises en situation (chambre, classe, cuisine, parc), gauche et droite, trajets, quadrillage, points cardinaux.'], ['maths', '🔢', 'Mathématiques visuelles', 'Calculs étape par étape, droite numérique, fractions.'], ['matieres', '📚', 'Mes matières', 'Géographie, histoire, langues, sciences, informatique…']]],
       ['📚 Comprendre mes cours', [['analyse', '📚', 'Comprendre mon cours', 'Importe un cours : passages difficiles, définitions, version simple.'], ['simplif', '🧩', 'Simplifier', 'Phrases plus courtes, mots expliqués, liste, tableau.'], ['fiches', '🗂️', 'Fiches, cartes mentales, quiz', 'À partir de n’importe quel document.'], ['slides', '📊', 'Analyser un PowerPoint', 'Fautes, lisibilité, contrastes, mise en page — et export corrigé.']]],
-      ['🌱 Mon espace', [['profil', '🧭', 'Mes besoins et préférences', 'Police, espacements, règle, concentration…'], ['sante', '🩺', 'Trouver un professionnel de santé', 'Carte de France par région, recherche par nom ou téléphone, carnet privé.'], ['defis', '🧩', 'Défis (facultatif)', 'Suites logiques, nombres premiers, estimations.']]]
+      ['🌱 Mon espace', [['profil', '🧭', 'Mes besoins et préférences', 'Police, espacements, règle, concentration…'], ['orga', '🗓️', 'Organisation', 'Emploi du temps, compte à rebours avant un contrôle, check-list de relecture.'], ['sante', '🩺', 'Trouver un professionnel de santé', 'Carte de France par région, recherche par nom ou téléphone, carnet privé.'], ['defis', '🧩', 'Défis (facultatif)', 'Suites logiques, nombres premiers, estimations.']]]
     ];
     const norm = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
     const tiles = []; const grid = h('div');
@@ -468,7 +469,7 @@ App.reg({
     let res = null, timer = null;
     const visible = () => res.errors.filter(e => !App.hidden.has(e.cat) && !App.ignored.has(App.errKey(e)));
     const analyse = (log) => {
-      const t = ta.value; App.setText(t); if (!t.trim()) { out.innerHTML = ''; chips.replaceChildren(); stat.textContent = ''; listBox.replaceChildren(); res = null; return; }
+      const t = ta.value; App.setText(t); if (t.length > 120000) App.toast('Texte très long : l’analyse peut prendre quelques secondes.'); if (!t.trim()) { out.innerHTML = ''; chips.replaceChildren(); stat.textContent = ''; listBox.replaceChildren(); res = null; return; }
       res = Corrector.analyze(t, { typoSpaces: App.prefs.softTypo }); (App.postAnalyse || []).forEach(f => f(res, t));
       if (log) App.log('texte', App.ws.title, { errors: visible(), count: 'texts' });
       paint();

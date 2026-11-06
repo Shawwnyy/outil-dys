@@ -219,3 +219,19 @@ Le nombre de lunes évolue avec les découvertes : vérifie une source récente.
 **🏠 Accueil** : les outils sont maintenant juste sous « Bienvenue ». Le bouton « ▶ Reprendre » est à côté de la recherche ; les favoris ⭐ et les outils récemment ouverts passent sous les tuiles.
 
 **Écran** : comme le bandeau est un peu plus haut, l'en-tête reste collé en haut seulement si la fenêtre fait plus de 780 px de haut (sinon il défile avec la page).
+
+## Mise à jour V2.4 : 5 nouveaux outils et corrections
+
+Nouveau bloc **🧠 S'entraîner** sur l'accueil (et dans « Mes outils ») :
+
+- **🔠 Conjugueur** (`js/conjug.js`) : un verbe à l'infinitif → 11 temps (présent, passé composé, imparfait, plus-que-parfait, futur, futur antérieur, conditionnel présent/passé, subjonctif présent/passé, impératif), terminaisons en couleur, écoute, copie ; verbes pronominaux (*se laver*) et impersonnels (*falloir*, *pleuvoir*) ; un **entraînement** (je tape la forme, correction avec l'astuce, « presque » si seul un accent manque) et un **mémo** des règles. Le moteur applique les règles : verbes en -er avec leurs pièges (-cer, -ger, -yer, -eler/-eter, é/e + consonne), 2e groupe, -dre réguliers, ~45 verbes irréguliers fréquents et leurs familles (prendre → apprendre…). **Limites** : pas de passé simple ; pour un verbe rare, le message dit « je suppose… » ; ça ne remplace pas un dictionnaire de conjugaison.
+- **🧠 Orthographe : s'entraîner** (`js/entrain.js`) : **homophones** (16 paires : a/à, et/est, on/ont, son/sont, ces/ses, ce/se, c'est/s'est, la/là/l'a, ou/où, mais/mes, peu/peut, sa/ça, ma/m'a, quelle/qu'elle, prêt/près, plutôt/plus tôt ; 54 phrases originales, astuce à chaque réponse, bilan « à revoir ») et **ordre alphabétique** (3 niveaux, explication de la 1re lettre qui diffère).
+- **🧮 Calcul mental, heure et monnaie** (`js/entrain.js`) : calculs +, −, ×, ÷ (3 niveaux, 10/20 calculs ou chrono 60 s, **astuce de calcul** après une erreur, lecture à voix haute facultative) ; **lire l'heure** sur une horloge à aiguilles (lire l'heure ou choisir la bonne horloge, heure dite en mots : « trois heures moins le quart ») ; **monnaie en euros** (rendre la monnaie avec la méthode du complément, compter des billets et pièces). Les calculs sont générés puis vérifiés par le programme.
+- **🃏 Cartes mémoire** (`js/memo.js`) : tes propres cartes question → réponse, **répétition espacée** par boîtes de Leitner (revoir après 1, 3, 7, 14, 30 jours ; une carte ratée revient dans la boîte 1). Import « une carte par ligne : question ; réponse » (ou « : », « | », tabulation, collage depuis un tableur), repérage des lignes « terme : définition » dans ton cours, 2 paquets d'exemple (unités et durées ; tables de multiplication), export texte, touches Espace / 1 / 2 / 3. Aucune donnée envoyée ; ce n'est pas une garantie de réussite.
+- **🗓️ Organisation** (`js/orga.js`, dans « Mon espace ») : **emploi du temps** de la semaine (même texte = même couleur, aujourd'hui entouré, « maintenant / ensuite », impression), **compte à rebours** avant un contrôle ou un exposé (J-12, répartition des leçons par jour), **check-list de relecture** à cocher avant de rendre un devoir (avec liens vers le correcteur, la lecture audio, le dictionnaire).
+
+Corrections :
+- Si le stockage du navigateur est plein ou bloqué, un message le dit (avant, les modifications étaient perdues sans avertissement).
+- Message d'attente pour les textes très longs (> 20 000 mots) dans le correcteur.
+- Doublons supprimés dans les descriptions au survol ; `sw.js` liste les nouveaux fichiers (mode hors ligne).
+- Vérifié : 58 modules sans erreur au clavier, avec des données corrompues dans le stockage, en mobile (320 px) et en zoom 300 %.

@@ -36,7 +36,11 @@ const CORE = [
   'js/geo.js',
   'js/sante.js',
   'img/icon-192.png',
-  'img/icon-512.png'
+  'img/icon-512.png',
+  'js/conjug.js',
+  'js/entrain.js',
+  'js/memo.js',
+  'js/orga.js'
 ];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => Promise.all(CORE.map(u => c.add(new Request(u, { cache: 'reload' })).catch(() => {})))).then(() => self.skipWaiting()));
