@@ -110,7 +110,7 @@ const Entrain = (() => {
     box.append(h('div', { class: 'card' }, h('h2', { style: 'margin-top:0' }, 'Classer des mots dans l’ordre du dictionnaire'), h('p', { class: 'muted' }, 'Pour chercher un mot dans un dictionnaire, il faut connaître l’ordre alphabétique. Si deux mots commencent par la même lettre, on regarde la lettre suivante. Les accents ne comptent pas.'), h('div', { class: 'row' }, h('label', { for: 'alLv', style: 'margin:0' }, 'Niveau'), h('select', { id: 'alLv', onchange: ev => { level = +ev.target.value; } }, [[1, '1 — premières lettres différentes'], [2, '2 — même première lettre'], [3, '3 — mêmes deux premières lettres']].map(([v, l]) => h('option', { value: v, selected: v === level }, l))), h('button', { class: 'btn', onclick: start }, '▶ Commencer'))), area);
   }
 
-  App.reg({ id: 'ortho', title: 'S’entraîner : orthographe', group: 'outils', icon: '🧠', learn: true, render(el) {
+  App.reg({ id: 'ortho', title: 'Orthographe : s’entraîner', group: 'entrainer', icon: '🧠', learn: true, render(el) {
     el.append(h('h1', null, '🧠 S’entraîner : orthographe'), h('p', { class: 'muted' }, 'Des exercices courts. Le programme te dit tout de suite si c’est juste, et te donne l’astuce. Rien n’est envoyé sur internet.'));
     Sub.tabs(el, [['Homophones (a/à, et/est…)', homophones], ['Ordre alphabétique', alphabet]]);
   } });
@@ -260,7 +260,7 @@ const Entrain = (() => {
       h('label', { for: 'moL', style: 'margin:0' }, 'Niveau'), h('select', { id: 'moL', onchange: ev => { cfg.lvl = +ev.target.value; } }, [[1, '1 — euros entiers'], [2, '2 — avec 50 centimes'], [3, '3 — centimes (multiples de 5)'], [4, '4 — tous les centimes']].map(([v, l]) => h('option', { value: v, selected: cfg.lvl === v }, l))), h('button', { class: 'btn', onclick: start }, '▶ Commencer'))), area);
   }
 
-  App.reg({ id: 'calcmental', title: 'Calcul mental, heure et monnaie', group: 'outils', icon: '🧮', learn: true, render(el) {
+  App.reg({ id: 'calcmental', title: 'Calcul mental, heure et monnaie', group: 'entrainer', icon: '🧮', learn: true, render(el) {
     el.append(h('h1', null, '🧮 Calcul mental, heure et monnaie'), h('p', { class: 'muted' }, 'Entraînements courts pour les calculs, la lecture de l’heure et l’argent. Les calculs sont tirés au hasard et corrigés par le programme, avec une astuce quand tu te trompes.'));
     Sub.tabs(el, [['Calcul mental', calcul], ['Lire l’heure', heure], ['Monnaie', monnaie]]);
   } });

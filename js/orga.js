@@ -57,9 +57,18 @@ const Orga = (() => {
     box.append(h('div', { class: 'card' }, h('h2', { style: 'margin-top:0' }, 'Check-list avant de rendre un devoir'), h('p', { class: 'muted' }, 'Coche ce que tu as vérifié. Un conseil : fais une passe par type d’erreur (d’abord les majuscules, puis les accords…) plutôt que tout à la fois.'), prog, h('button', { class: 'btn ghost small', onclick: () => { S = {}; save(); box.querySelectorAll('input[type=checkbox]').forEach(i => { i.checked = false; }); upd(); } }, '↺ Tout décocher')), ...CHECK.map(([t, items]) => h('div', { class: 'card' }, h('h3', { style: 'margin-top:0' }, t), items.map(txt => { const id = t + '|' + txt; return h('label', { class: 'chk', style: 'display:flex;gap:.5rem;align-items:flex-start;margin:.3rem 0' }, h('input', { type: 'checkbox', checked: !!S[id], onchange: ev => { if (ev.target.checked) S[id] = 1; else delete S[id]; save(); upd(); } }), h('span', null, txt)); }), LINKS[t] ? h('p', null, LINKS[t].map(([id, l]) => h('a', { class: 'btn sec small', href: '#/' + id, style: 'margin:.15rem' }, l))) : null))); upd();
   }
 
-  App.reg({ id: 'orga', title: 'Organisation', group: 'espace', icon: '🗓️', learn: true, render(el) {
+  App.reg({ id: 'orga', title: 'Organisation', group: 'entrainer', icon: '🗓️', learn: true, render(el) {
     el.append(h('h1', null, '🗓️ Organisation'), h('p', { class: 'muted' }, 'Emploi du temps, compte à rebours avant un contrôle, et check-list de relecture. Tout est écrit par toi et reste sur cet appareil.'));
     Sub.tabs(el, [['Emploi du temps', edt], ['Compte à rebours', countdown], ['Check-list de relecture', check]]);
   } });
-  return { daysTo, label, parseDate };
+  // Pour le panneau de droite et la page « S’entraîner » : ce qui vient (dates à venir) et ce qu'il y a dans l'emploi du temps maintenant / ensuite.
+  const upcoming = () => (Store.get('orga.events', []) || []).filter(e => e && e.date && daysTo(e.date) !== null && daysTo(e.date) >= 0).sort((a, b) => a.date.localeCompare(b.date));
+  const soon = () => {
+    const E = Object.assign({ from: 8, to: 17, we: false, cells: {} }, Store.get('orga.edt', {})); const cells = E.cells || {}; const now = new Date(); const j = (now.getDay() + 6) % 7, hr = now.getHours(); const days = E.we ? 7 : 5;
+    const empty = !Object.values(cells).some(v => v && String(v).trim()); if (empty) return { empty: true };
+    if (j >= days) return { off: true };
+    const cur = hr >= E.from && hr <= E.to ? cells[j + '-' + hr] || '' : ''; let nxt = null; for (let x = Math.max(hr + 1, E.from); x <= E.to; x++) if (cells[j + '-' + x]) { nxt = [x, cells[j + '-' + x]]; break; }
+    return { cur, nxt, hr };
+  };
+  return { daysTo, label, parseDate, upcoming, soon };
 })();

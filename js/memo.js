@@ -107,7 +107,7 @@ const Memo = (() => {
       out, h('p', null, h('button', { class: 'btn', onclick: goReview }, '▶ Aller réviser')));
   }
 
-  App.reg({ id: 'memo', title: 'Cartes mémoire', group: 'outils', icon: '🃏', learn: true, render(el) {
+  App.reg({ id: 'memo', title: 'Cartes mémoire', group: 'entrainer', icon: '🃏', learn: true, render(el) {
     el.append(h('h1', null, '🃏 Cartes mémoire'), h('p', { class: 'muted' }, 'Révise tes leçons avec des cartes question → réponse. Les cartes que tu connais reviennent de plus en plus tard, celles que tu rates reviennent vite (boîtes de Leitner). Tout reste dans ce navigateur.'));
     // pour naviguer entre onglets depuis les boutons
     let tabsBar;

@@ -59,7 +59,7 @@ const Extras = (() => {
     try { const ks = (await caches.keys()).filter(k => k.startsWith('outil-dys-')); let n = 0; for (const k of ks) n += (await (await caches.open(k)).keys()).length; const reg = await navigator.serviceWorker.getRegistration(); return n > 5 && reg ? { ok: true, n } : { ok: false, why: 'Pas encore prêt : recharge la page une fois, puis réessaie.' }; } catch { return { ok: false, why: 'La mémoire hors ligne n’est pas accessible dans ce navigateur.' }; } };
 
   // ── fenêtre des raccourcis ──
-  const SHORT = [['/', 'ou', 'Ctrl + K', 'Chercher un outil ou un mot'], ['?', '', '', 'Afficher cette aide'], ['Alt + R', '', '', 'Lire à voix haute le texte sélectionné'], ['Échap', '', '', 'Arrêter la lecture, fermer une bulle ou une fenêtre'], ['Alt + C', '', '', 'Mode concentration (menu masqué)'], ['Tab', '', '', 'Passer d’un outil à l’autre (une bulle explique chaque outil)'], ['Alt + 1 … 9', '', '', 'Aller à un outil (si « raccourcis » est activé dans Mes besoins)'], ['Ctrl + P', '', '', 'Imprimer la page (menu et boutons masqués)']];
+  const SHORT = [['/', 'ou', 'Ctrl + K', 'Chercher un outil ou un mot'], ['?', '', '', 'Afficher cette aide'], ['Alt + R', '', '', 'Lire à voix haute le texte sélectionné'], ['Échap', '', '', 'Arrêter la lecture, fermer une bulle ou une fenêtre'], ['Alt + C', '', '', 'Mode concentration (menu masqué)'], ['Alt + P', '', '', 'Ouvrir ou fermer le panneau de droite (à faire, chiffres, mot du jour…)'], ['Tab', '', '', 'Passer d’un outil à l’autre (une bulle explique chaque outil)'], ['Alt + 1 … 9', '', '', 'Aller à un outil (si « raccourcis » est activé dans Mes besoins)'], ['Ctrl + P', '', '', 'Imprimer la page (menu et boutons masqués)']];
   let dlg = null;
   const help = () => { if (dlg && dlg.open) return; dlg = h('dialog', { class: 'xdlg', 'aria-labelledby': 'xdlgT' }, h('h2', { id: 'xdlgT', style: 'margin-top:0' }, '⌨️ Raccourcis clavier'),
       h('table', { class: 't' }, h('tbody', null, SHORT.map(([a, mid, b, d]) => h('tr', null, h('td', null, h('kbd', null, a), mid ? ' ' + mid + ' ' : '', b ? h('kbd', null, b) : null), h('td', null, d))))),
@@ -89,7 +89,7 @@ const Extras = (() => {
     el.append(aboutCard());
   };
 
-  const VERSION = 'Outil Dys V2.4 — 6 novembre 2026';
+  const VERSION = 'Outil Dys V2.5 — 6 novembre 2026';
   const aboutCard = () => h('div', { class: 'card secondary' }, h('h2', { style: 'margin-top:0' }, 'ℹ️ À propos'), h('p', null, VERSION + '. Outil local et privé : tes textes restent sur cet appareil.'),
     h('ul', null, h('li', null, 'Les aides proposées sont des adaptations, pas des diagnostics : l’outil ne dit jamais si une personne a un trouble.'), h('li', null, 'Le correcteur fonctionne par règles : il rate des fautes et peut se tromper. Relis toujours.'), h('li', null, 'Les données (santé, mots nouveaux…) viennent de sources publiques datées ; elles peuvent être incomplètes ou changer.'), h('li', null, 'Rien ne part sur internet sans ton clic (définitions en ligne, liens externes).')),
     h('p', { class: 'muted' }, 'Code : ', h('a', { href: 'https://github.com/Shawwnyy/outil-dys', target: '_blank', rel: 'noopener noreferrer' }, 'github.com/Shawwnyy/outil-dys'), ' (le lien s’ouvre seulement si tu cliques).'));

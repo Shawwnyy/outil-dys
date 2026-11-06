@@ -265,5 +265,5 @@ const Conj = (() => {
       Sub.notice('', 'Ce conjugueur applique des règles et une liste de verbes irréguliers fréquents ; il ne remplace pas un dictionnaire de conjugaison pour les verbes rares.')
     );
   }
-  App.reg({ id: 'conjugueur', title: 'Conjugueur', group: 'outils', icon: '🔠', learn: true, render });
+  App.reg({ id: 'conjugueur', title: 'Conjugueur', group: 'entrainer', icon: '🔠', learn: true, render });
 })();

@@ -37,6 +37,7 @@ const CORE = [
   'js/sante.js',
   'img/icon-192.png',
   'img/icon-512.png',
+  'js/cote.js',
   'js/conjug.js',
   'js/entrain.js',
   'js/memo.js',

@@ -17,7 +17,7 @@ const h = (tag, a, ...kids) => {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const Store = {
   get(k, d) { try { const v = localStorage.getItem('dys.' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
-  set(k, v) { try { localStorage.setItem('dys.' + k, JSON.stringify(v)); } catch { if (!Store._warned && typeof App !== 'undefined' && App.toast) { Store._warned = true; App.toast('⚠ Le stockage de ce navigateur est plein ou bloqué : tes dernières modifications ne sont pas enregistrées. Va dans Paramètres pour faire une sauvegarde, puis libère de la place.'); } } },
+  set(k, v) { try { localStorage.setItem('dys.' + k, JSON.stringify(v)); if (Store.onSet) Store.onSet(k); } catch { if (!Store._warned && typeof App !== 'undefined' && App.toast) { Store._warned = true; App.toast('⚠ Le stockage de ce navigateur est plein ou bloqué : tes dernières modifications ne sont pas enregistrées. Va dans Paramètres pour faire une sauvegarde, puis libère de la place.'); } } },
   clear() { try { Object.keys(localStorage).filter(k => k.startsWith('dys.')).forEach(k => localStorage.removeItem(k)); } catch { } }
 };
 
@@ -52,7 +52,7 @@ const App = {
   ignored: new Set(), engines: {}, learning: false, hidden: new Set(),
 
   reg(m) { this.mods.push(m); },
-  groups: [['home', 'Accueil'], ['espace', 'Mon espace'], ['outils', 'Mes outils'], ['matieres', 'Mes matières'], ['modes', "Mes modes d'apprentissage"], ['activites', 'Mes activités'], ['params', 'Paramètres']],
+  groups: [['home', 'Accueil'], ['entrainer', '🧠 S’entraîner'], ['espace', 'Mon espace'], ['outils', 'Mes outils'], ['matieres', 'Mes matières'], ['modes', "Mes modes d'apprentissage"], ['activites', 'Mes activités'], ['params', 'Paramètres']],
 
   // ---------------------------------------------------------------- préférences et adaptation
   savePrefs() { Store.set('prefs', this.prefs); this.adapt(); },
@@ -136,7 +136,7 @@ const App = {
     $('#menuBtn').addEventListener('click', () => { const hide = document.body.classList.toggle('nav-hidden'); $('#menuBtn').setAttribute('aria-expanded', String(!hide)); });
     $('#focusBtn').addEventListener('click', () => this.toggleFocus());
     const bump = d => { const n = Math.max(14, Math.min(32, (+this.prefs.size || 18) + d)); this.prefs.size = n; this.savePrefs(); this.toast('Taille du texte : ' + n + ' px' + (n === 14 || n === 32 ? ' (limite)' : '')); };
-    $('#aMinus').addEventListener('click', () => bump(-2)); $('#aPlus').addEventListener('click', () => bump(2)); this.initReadSel(); this.initBar(); if (typeof Recherche !== 'undefined') Recherche.init(); if (typeof Survol !== 'undefined') Survol.init(); if (typeof Extras !== 'undefined') Extras.init();
+    $('#aMinus').addEventListener('click', () => bump(-2)); $('#aPlus').addEventListener('click', () => bump(2)); this.initReadSel(); this.initBar(); if (typeof Recherche !== 'undefined') Recherche.init(); if (typeof Survol !== 'undefined') Survol.init(); if (typeof Extras !== 'undefined') Extras.init(); if (typeof Cote !== 'undefined') Cote.init();
     if (this.feat('focus')) document.body.classList.add('focus');
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { this.hidePop(); this.stopSpeak(); }
@@ -353,10 +353,10 @@ App.reg({
     const nDue = typeof Rev !== 'undefined' ? Rev.dueList().length : 0;
     const sections = [
       ['✍️ Écrire, lire, réviser', [['correcteur', '✍️', 'Corriger un texte', 'Les fautes sont colorées selon 15 catégories, avec explications.'], ['revision', '🔁', 'Réviser mes dictées', nDue ? `${nDue} mot${nDue > 1 ? 's' : ''} à réviser maintenant.` : 'Garde les mots ratés en dictée et révise-les en courtes séances.'], ['lecture', '🔊', 'Écouter un texte', 'Lecture à voix haute avec la voix de ton choix, syllabes, règle de lecture.'], ['dico', '📖', 'Dictionnaire', 'Chercher un mot, mots nouveaux 2026-2027, mots qui se ressemblent.'], ['dictee', '🎤', 'Dictée vocale', 'Dicte ton texte ou compare ta dictée à un modèle.'], ['dictee-orale', '🎧', 'Dictée orale', 'Un narrateur dicte, tu écris, puis correction détaillée.'], ['dactylo', '⌨️', 'Dactylographie', 'Écrire vite et juste, avec correction et suivi.']]],
-      ['🧠 S’entraîner', [['conjugueur', '🔠', 'Conjugueur', 'Tous les temps d’un verbe, terminaisons en couleur, entraînement.'], ['ortho', '🧠', 'Orthographe : s’entraîner', 'Homophones (a/à, et/est…) et ordre alphabétique, avec l’astuce.'], ['calcmental', '🧮', 'Calcul mental, heure, monnaie', 'Calculs rapides, lire l’heure sur l’horloge, rendre la monnaie.'], ['memo', '🃏', 'Cartes mémoire', 'Tes propres cartes, révisées au bon moment (boîtes de Leitner).']]],
+      ['🧠 S’entraîner', [['entrainer', '🧠', 'Vue d’ensemble : à faire aujourd’hui', 'Ce qui t’attend (cartes, dictées, échéances) et tous les outils d’entraînement au même endroit.'], ['conjugueur', '🔠', 'Conjugueur', 'Tous les temps d’un verbe, terminaisons en couleur, entraînement.'], ['ortho', '🧠', 'Orthographe : s’entraîner', 'Homophones (a/à, et/est…) et ordre alphabétique, avec l’astuce.'], ['calcmental', '🧮', 'Calcul mental, heure, monnaie', 'Calculs rapides, lire l’heure sur l’horloge, rendre la monnaie.'], ['memo', '🃏', 'Cartes mémoire', 'Tes propres cartes, révisées au bon moment (boîtes de Leitner).'], ['orga', '🗓️', 'Organisation', 'Emploi du temps, compte à rebours avant un contrôle, check-list de relecture.']]],
       ['🧭 Me repérer', [['mode-spatial', '🧭', 'Repérage dans l’espace', 'Mises en situation (chambre, classe, cuisine, parc), gauche et droite, trajets, quadrillage, points cardinaux.'], ['maths', '🔢', 'Mathématiques visuelles', 'Calculs étape par étape, droite numérique, fractions.'], ['matieres', '📚', 'Mes matières', 'Géographie, histoire, langues, sciences, informatique…']]],
       ['📚 Comprendre mes cours', [['analyse', '📚', 'Comprendre mon cours', 'Importe un cours : passages difficiles, définitions, version simple.'], ['simplif', '🧩', 'Simplifier', 'Phrases plus courtes, mots expliqués, liste, tableau.'], ['fiches', '🗂️', 'Fiches, cartes mentales, quiz', 'À partir de n’importe quel document.'], ['slides', '📊', 'Analyser un PowerPoint', 'Fautes, lisibilité, contrastes, mise en page — et export corrigé.']]],
-      ['🌱 Mon espace', [['profil', '🧭', 'Mes besoins et préférences', 'Police, espacements, règle, concentration…'], ['orga', '🗓️', 'Organisation', 'Emploi du temps, compte à rebours avant un contrôle, check-list de relecture.'], ['sante', '🩺', 'Trouver un professionnel de santé', 'Carte de France par région, recherche par nom ou téléphone, carnet privé.'], ['defis', '🧩', 'Défis (facultatif)', 'Suites logiques, nombres premiers, estimations.']]]
+      ['🌱 Mon espace', [['profil', '🧭', 'Mes besoins et préférences', 'Police, espacements, règle, concentration…'], ['sante', '🩺', 'Trouver un professionnel de santé', 'Carte de France par région, recherche par nom ou téléphone, carnet privé.'], ['defis', '🧩', 'Défis (facultatif)', 'Suites logiques, nombres premiers, estimations.']]]
     ];
     const norm = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
     const tiles = []; const grid = h('div');
