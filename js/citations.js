@@ -1,5 +1,5 @@
 // Citation du jour : uniquement des proverbes traditionnels (sans auteur connu), pour ne jamais attribuer une phrase à quelqu'un qui ne l'a pas dite.
-// Les deux derniers viennent d'une autre langue : la langue est indiquée. Une phrase par jour, qui change à minuit ; le bouton « autre » en montre une autre.
+// Les deux derniers viennent d'une autre langue : la langue est indiquée. Une nouvelle phrase chaque minute (elles tournent dans un ordre mélangé) ; le bouton ↻ en montre une autre.
 const CITATIONS = [
   ['C’est en forgeant qu’on devient forgeron.', 'Proverbe français'],
   ['Petit à petit, l’oiseau fait son nid.', 'Proverbe français'],
@@ -25,5 +25,28 @@ const CITATIONS = [
   ['Qui ne tente rien n’a rien.', 'Proverbe français'],
   ['Il faut battre le fer tant qu’il est chaud.', 'Proverbe français'],
   ['Qui va piano va sano.', 'Proverbe italien : qui va doucement va sûrement'],
+  ['Quand on veut, on peut.', 'Proverbe français'],
+  ['Ne remets pas à demain ce que tu peux faire aujourd’hui.', 'Proverbe français'],
+  ['Faute avouée est à moitié pardonnée.', 'Proverbe français'],
+  ['Il n’y a que le premier pas qui coûte.', 'Proverbe français'],
+  ['La patience est mère de toutes les vertus.', 'Proverbe français'],
+  ['Bien faire et laisser dire.', 'Proverbe français'],
+  ['Tout est bien qui finit bien.', 'Proverbe français'],
+  ['Mieux vaut en rire qu’en pleurer.', 'Proverbe français'],
+  ['L’habit ne fait pas le moine.', 'Proverbe français'],
+  ['Chat échaudé craint l’eau froide.', 'Proverbe français'],
+  ['Il faut tourner sept fois sa langue dans sa bouche avant de parler.', 'Proverbe français'],
+  ['On ne fait pas d’omelette sans casser des œufs.', 'Proverbe français'],
+  ['Une fois n’est pas coutume.', 'Proverbe français'],
+  ['Chaque médaille a son revers.', 'Proverbe français'],
+  ['Aux grands maux, les grands remèdes.', 'Proverbe français'],
+  ['À chaque jour suffit sa peine.', 'Proverbe français'],
+  ['L’appétit vient en mangeant.', 'Proverbe français'],
+  ['Les bons comptes font les bons amis.', 'Proverbe français'],
+  ['Plus on est de fous, plus on rit.', 'Proverbe français'],
+  ['Il vaut mieux être seul que mal accompagné.', 'Proverbe français'],
+  ['La parole est d’argent, le silence est d’or.', 'Proverbe français'],
+  ['Pierre qui roule n’amasse pas mousse.', 'Proverbe français'],
+  ['Ce qui est fait n’est plus à faire.', 'Proverbe français'],
   ['Un voyage de mille lieues commence toujours par un premier pas.', 'Proverbe chinois, souvent rattaché au Tao-tö king (la formulation varie selon les traductions)']
 ];
