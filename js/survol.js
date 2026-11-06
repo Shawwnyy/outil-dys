@@ -31,6 +31,7 @@ const Survol = (() => {
     expose: 'T’aide à préparer un exposé étape par étape.',
     revision: 'Garde les mots ratés en dictée et te les fait réviser en courtes séances.',
     'dictee-orale': 'Un narrateur lit un texte groupe de mots par groupe de mots ; tu écris ; quand tu as fini, correction détaillée faute par faute avec une note indicative sur 20.',
+    presentation: 'À quoi sert Outil Dys, ce qu’il contient, ses règles (local, privé, pas de diagnostic, données sourcées) et comment commencer.',
     entrainer: 'La page de départ pour t’entraîner : ce qui est à faire maintenant (cartes et dictées à réviser, prochaine date, emploi du temps) et tous les outils d’entraînement au même endroit.',
     conjugueur: 'Écris un verbe à l’infinitif : tous les temps s’affichent (présent, passé composé, futur…), avec les terminaisons en couleur, et un entraînement.',
     ortho: 'Exercices courts : choisir le bon homophone (a / à, et / est…) avec l’astuce, et classer des mots dans l’ordre alphabétique.',

@@ -255,3 +255,15 @@ body.aside-dock #aside{grid-column:3;grid-row:2;align-self:start;position:sticky
 /* pas assez de place : tiroir qui glisse par-dessus la page (✕ ou Échap pour fermer) */
 body:not(.aside-dock) #aside{position:fixed;top:0;right:0;bottom:0;width:min(24rem,92vw);z-index:40;border-radius:14px 0 0 14px;overflow:auto;box-shadow:-10px 0 40px rgba(0,0,0,.4)}
 body.top-free #top{position:static}
+
+/* languette du panneau (au bord droit, visible quand le panneau est fermé) */
+.asidetab{position:fixed;right:0;top:72%;transform:translateY(-50%);z-index:30;writing-mode:vertical-rl;text-orientation:mixed;min-width:2.6rem;padding:.9rem .3rem;border:2px solid var(--accent);border-right:0;border-radius:12px 0 0 12px;background:var(--accent);color:var(--accent-ink);font:inherit;font-size:.9rem;font-weight:700;cursor:pointer;box-shadow:-3px 3px 12px rgba(0,0,0,.3)}
+.asidetab:hover{filter:brightness(1.1)}
+body.aside-on .asidetab,body.focus .asidetab{display:none}
+@media print{.asidetab{display:none!important}}
+body:not(.aside-on):not(.focus) #main{padding-right:3.4rem}
+/* présentation (accueil et page dédiée) */
+details.intro{margin:.4rem 0 0;border-top:1px solid var(--line);padding-top:.2rem}details.intro .cote-chip{cursor:help}
+details.intro>summary{cursor:pointer;font-weight:700;min-height:var(--tap);display:flex;align-items:center}
+.intro-pills{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(13rem,100%),1fr));gap:.5rem}
+.intro-pill{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.4rem .6rem}.intro-pill b{display:block;font-size:.95em}.intro-pill small{display:block;color:var(--muted);font-size:.84em;line-height:1.35}

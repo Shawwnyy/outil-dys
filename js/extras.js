@@ -97,5 +97,5 @@ const Extras = (() => {
     document.addEventListener('keydown', e => { if (e.key !== '?' || e.ctrlKey || e.metaKey || e.altKey) return; const a = document.activeElement; if (a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable)) return; e.preventDefault(); help(); });
     initSW();
   };
-  return { init, afterRoute, homeTop, resumeBtn, wodCard, settingsCards, help, favs, recent, toggleFav, wordOfDay, exportData, parseBackup, restore, keys, offlineInfo };
+  return { VERSION, init, afterRoute, homeTop, resumeBtn, wodCard, settingsCards, help, favs, recent, toggleFav, wordOfDay, exportData, parseBackup, restore, keys, offlineInfo };
 })();
